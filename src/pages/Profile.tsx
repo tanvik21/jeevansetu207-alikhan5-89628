@@ -2,6 +2,7 @@
 import React, { useEffect, useState } from 'react';
 import MainLayout from '@/components/layout/MainLayout';
 import DoctorProfile from '@/components/profile/DoctorProfile';
+import InternProfile from '@/components/profile/InternProfile';
 import { UserRole } from '@/types';
 import { useNavigate } from 'react-router-dom';
 
@@ -26,14 +27,7 @@ const Profile = () => {
     <MainLayout>
       <div className="container mx-auto py-8 px-4">
         {userRole === 'doctor' && <DoctorProfile />}
-        {userRole === 'intern' && (
-          <div className="flex h-96 items-center justify-center">
-            <div className="text-center">
-              <h2 className="text-2xl font-bold">Intern Profile</h2>
-              <p className="text-muted-foreground mt-2">This section is under development</p>
-            </div>
-          </div>
-        )}
+        {userRole === 'intern' && <InternProfile />}
       </div>
     </MainLayout>
   );

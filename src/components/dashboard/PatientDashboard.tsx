@@ -10,6 +10,7 @@ import AppointmentList from './components/AppointmentList';
 import HealthRecordsList from './components/HealthRecordsList';
 import AIHealthAssistant from './components/AIHealthAssistant';
 import CancerCareJourney from './components/CancerCareJourney';
+import BookAppointmentDialog from '@/components/appointments/BookAppointmentDialog';
 
 const PatientDashboard: React.FC = () => {
   const [activeTab, setActiveTab] = useState('overview');
@@ -20,10 +21,12 @@ const PatientDashboard: React.FC = () => {
     <div className="space-y-6">
       <div className="flex justify-between items-center">
         <h1 className="text-3xl font-bold">Patient Dashboard</h1>
-        <Button>
-          <PlusCircle className="h-4 w-4 mr-2" />
-          New Appointment
-        </Button>
+        <BookAppointmentDialog>
+          <Button>
+            <PlusCircle className="h-4 w-4 mr-2" />
+            New Appointment
+          </Button>
+        </BookAppointmentDialog>
       </div>
       
       {hasHighRiskFlag && (

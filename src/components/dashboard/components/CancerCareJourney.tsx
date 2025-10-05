@@ -1,11 +1,20 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Calendar, Activity, MapPin, FileText, Heart } from 'lucide-react';
 import { Progress } from '@/components/ui/progress';
+import UpdateStatusDialog from './UpdateStatusDialog';
+import CareTimelineDialog from './CareTimelineDialog';
+import CancerScreeningDialog from '@/components/appointments/CancerScreeningDialog';
 
 const CancerCareJourney: React.FC = () => {
+  const [statusData, setStatusData] = useState({
+    fatigue: 3,
+    nausea: 2,
+    pain: 1
+  });
+
   // Mock data for demonstration
   const nextAppointment = {
     type: 'Mammogram',
@@ -15,10 +24,19 @@ const CancerCareJourney: React.FC = () => {
   };
 
   const sideEffects = [
-    { name: 'Fatigue', value: 3 },
-    { name: 'Nausea', value: 2 },
-    { name: 'Pain', value: 1 }
+    { name: 'Fatigue', value: statusData.fatigue },
+    { name: 'Nausea', value: statusData.nausea },
+    { name: 'Pain', value: statusData.pain }
   ];
+
+  const handleStatusUpdate = () => {
+    // In a real app, this would fetch the latest data from the database
+    setStatusData({
+      fatigue: 3,
+      nausea: 2,
+      pain: 1
+    });
+  };
 
   return (
     <Card className="border-red-flag/20 shadow-lg">
@@ -80,9 +98,11 @@ const CancerCareJourney: React.FC = () => {
               </div>
             ))}
           </div>
-          <Button variant="outline" size="sm" className="w-full mt-3">
-            Update Today's Status
-          </Button>
+          <UpdateStatusDialog onSuccess={handleStatusUpdate}>
+            <Button variant="outline" size="sm" className="w-full mt-3">
+              Update Today's Status
+            </Button>
+          </UpdateStatusDialog>
         </div>
 
         {/* Resources */}
@@ -92,10 +112,12 @@ const CancerCareJourney: React.FC = () => {
             <h4 className="font-semibold">Care Resources</h4>
           </div>
           <div className="space-y-2">
-            <Button variant="outline" size="sm" className="w-full justify-start">
-              <MapPin className="h-4 w-4 mr-2" />
-              Find Nearest Screening Camp
-            </Button>
+            <CancerScreeningDialog>
+              <Button variant="outline" size="sm" className="w-full justify-start">
+                <MapPin className="h-4 w-4 mr-2" />
+                Find Nearest Screening Camp
+              </Button>
+            </CancerScreeningDialog>
             <Button variant="outline" size="sm" className="w-full justify-start">
               <FileText className="h-4 w-4 mr-2" />
               Download Care Plan
@@ -107,9 +129,11 @@ const CancerCareJourney: React.FC = () => {
         <Button className="w-full bg-red-flag hover:bg-red-flag/90">
           Schedule Specialist Consultation
         </Button>
-        <Button variant="outline" className="w-full">
-          View Full Care Timeline
-        </Button>
+        <CareTimelineDialog>
+          <Button variant="outline" className="w-full">
+            View Full Care Timeline
+          </Button>
+        </CareTimelineDialog>
       </CardFooter>
     </Card>
   );

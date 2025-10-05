@@ -14,7 +14,146 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      ai_chat_messages: {
+        Row: {
+          content: string
+          created_at: string
+          id: string
+          role: string
+          user_id: string
+        }
+        Insert: {
+          content: string
+          created_at?: string
+          id?: string
+          role: string
+          user_id: string
+        }
+        Update: {
+          content?: string
+          created_at?: string
+          id?: string
+          role?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      health_records: {
+        Row: {
+          attachments: string[] | null
+          created_at: string
+          diagnosis: string | null
+          doctor_name: string | null
+          id: string
+          notes: string | null
+          prescription: string | null
+          record_date: string
+          title: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          attachments?: string[] | null
+          created_at?: string
+          diagnosis?: string | null
+          doctor_name?: string | null
+          id?: string
+          notes?: string | null
+          prescription?: string | null
+          record_date: string
+          title: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          attachments?: string[] | null
+          created_at?: string
+          diagnosis?: string | null
+          doctor_name?: string | null
+          id?: string
+          notes?: string | null
+          prescription?: string | null
+          record_date?: string
+          title?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      profiles: {
+        Row: {
+          availability: string[] | null
+          avatar_url: string | null
+          bio: string | null
+          certifications: string[] | null
+          created_at: string
+          education: string[] | null
+          free_community_hours: number | null
+          full_name: string
+          hospital: string | null
+          id: string
+          learning_goals: string[] | null
+          phone: string | null
+          rating: number | null
+          role: string
+          skills: string[] | null
+          specialty: string | null
+          supervisor_id: string | null
+          updated_at: string
+          years_experience: number | null
+        }
+        Insert: {
+          availability?: string[] | null
+          avatar_url?: string | null
+          bio?: string | null
+          certifications?: string[] | null
+          created_at?: string
+          education?: string[] | null
+          free_community_hours?: number | null
+          full_name: string
+          hospital?: string | null
+          id: string
+          learning_goals?: string[] | null
+          phone?: string | null
+          rating?: number | null
+          role: string
+          skills?: string[] | null
+          specialty?: string | null
+          supervisor_id?: string | null
+          updated_at?: string
+          years_experience?: number | null
+        }
+        Update: {
+          availability?: string[] | null
+          avatar_url?: string | null
+          bio?: string | null
+          certifications?: string[] | null
+          created_at?: string
+          education?: string[] | null
+          free_community_hours?: number | null
+          full_name?: string
+          hospital?: string | null
+          id?: string
+          learning_goals?: string[] | null
+          phone?: string | null
+          rating?: number | null
+          role?: string
+          skills?: string[] | null
+          specialty?: string | null
+          supervisor_id?: string | null
+          updated_at?: string
+          years_experience?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "profiles_supervisor_id_fkey"
+            columns: ["supervisor_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Views: {
       [_ in never]: never

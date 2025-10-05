@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Button } from '@/components/ui/button';
@@ -11,6 +11,7 @@ import { Calendar, MessageCircle, Award, MapPin, Clock, Star, ThumbsUp, Users, M
 import { Doctor } from '@/types';
 import { Progress } from '@/components/ui/progress';
 import { toast } from 'sonner';
+import { supabase } from '@/integrations/supabase/client';
 
 // Mock data for a doctor profile
 const mockDoctor: Doctor = {
@@ -38,7 +39,58 @@ interface DoctorProfileProps {
 
 const DoctorProfile: React.FC<DoctorProfileProps> = ({ doctor = mockDoctor }) => {
   const [isEditing, setIsEditing] = useState(false);
+  const [loading, setLoading] = useState(true);
+  const [saving, setSaving] = useState(false);
+  const [profileData, setProfileData] = useState<Doctor | null>(null);
   const [editedDoctor, setEditedDoctor] = useState(doctor);
+
+  useEffect(() => {
+    fetchProfile();
+  }, []);
+
+  const fetchProfile = async () => {
+    try {
+      setLoading(true);
+      const { data: { user } } = await supabase.auth.getUser();
+      
+      if (!user) {
+        toast.error('Please log in to view your profile');
+        return;
+      }
+
+      const { data: profile, error } = await supabase
+        .from('profiles')
+        .select('*')
+        .eq('id', user.id)
+        .single();
+
+      if (error) throw error;
+
+      const doctorProfile: Doctor = {
+        id: profile.id,
+        name: profile.full_name,
+        email: user.email || '',
+        role: 'doctor',
+        specialty: profile.specialty || mockDoctor.specialty,
+        hospital: profile.hospital || mockDoctor.hospital,
+        bio: profile.bio || mockDoctor.bio,
+        yearsExperience: profile.years_experience || mockDoctor.yearsExperience,
+        education: profile.education || mockDoctor.education,
+        freeCommunityHours: profile.free_community_hours || mockDoctor.freeCommunityHours,
+        rating: profile.rating || mockDoctor.rating,
+        availability: profile.availability || mockDoctor.availability,
+      };
+
+      setProfileData(doctorProfile);
+      setEditedDoctor(doctorProfile);
+    } catch (error) {
+      console.error('Error fetching profile:', error);
+      setProfileData(mockDoctor);
+      setEditedDoctor(mockDoctor);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const medicalSpecialties = [
     'Cardiology',
@@ -55,15 +107,52 @@ const DoctorProfile: React.FC<DoctorProfileProps> = ({ doctor = mockDoctor }) =>
     'Internal Medicine'
   ];
 
-  const handleSave = () => {
-    toast.success('Profile updated successfully');
-    setIsEditing(false);
+  const handleSave = async () => {
+    if (!editedDoctor || !profileData) return;
+
+    try {
+      setSaving(true);
+      const { error } = await supabase
+        .from('profiles')
+        .update({
+          full_name: editedDoctor.name,
+          bio: editedDoctor.bio,
+          specialty: editedDoctor.specialty,
+          hospital: editedDoctor.hospital,
+          years_experience: editedDoctor.yearsExperience,
+          education: editedDoctor.education,
+          availability: editedDoctor.availability,
+          updated_at: new Date().toISOString(),
+        })
+        .eq('id', editedDoctor.id);
+
+      if (error) throw error;
+
+      setProfileData(editedDoctor);
+      setIsEditing(false);
+      toast.success('Profile updated successfully');
+    } catch (error) {
+      console.error('Error updating profile:', error);
+      toast.error('Failed to update profile');
+    } finally {
+      setSaving(false);
+    }
   };
 
   const handleCancel = () => {
-    setEditedDoctor(doctor);
+    setEditedDoctor(profileData || doctor);
     setIsEditing(false);
   };
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center h-96">
+        <div className="text-center">
+          <h2 className="text-2xl font-bold">Loading Profile...</h2>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6">
@@ -78,11 +167,11 @@ const DoctorProfile: React.FC<DoctorProfileProps> = ({ doctor = mockDoctor }) =>
               </Button>
             ) : (
               <div className="flex gap-2">
-                <Button onClick={handleSave} size="sm">
+                <Button onClick={handleSave} size="sm" disabled={saving}>
                   <Save className="h-4 w-4 mr-2" />
-                  Save
+                  {saving ? 'Saving...' : 'Save'}
                 </Button>
-                <Button onClick={handleCancel} size="sm" variant="outline">
+                <Button onClick={handleCancel} size="sm" variant="outline" disabled={saving}>
                   <X className="h-4 w-4 mr-2" />
                   Cancel
                 </Button>
@@ -152,7 +241,8 @@ const DoctorProfile: React.FC<DoctorProfileProps> = ({ doctor = mockDoctor }) =>
                     id="email"
                     type="email"
                     value={editedDoctor.email}
-                    onChange={(e) => setEditedDoctor({...editedDoctor, email: e.target.value})}
+                    disabled
+                    className="bg-muted"
                   />
                 </div>
                 

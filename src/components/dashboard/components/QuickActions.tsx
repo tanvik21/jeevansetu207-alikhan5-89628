@@ -1,8 +1,10 @@
 import React from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Calendar, MessageCircle, FileText, Search, MapPin } from 'lucide-react';
+import { Calendar, MessageCircle, FileText, Search } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
+import BookAppointmentDialog from '@/components/appointments/BookAppointmentDialog';
+import CancerScreeningDialog from '@/components/appointments/CancerScreeningDialog';
 
 const QuickActions: React.FC = () => {
   const navigate = useNavigate();
@@ -19,10 +21,12 @@ const QuickActions: React.FC = () => {
             <Search className="h-5 w-5 mb-2" />
             <span className="text-sm">Symptom Check</span>
           </Button>
-          <Button variant="outline" className="h-20 flex flex-col">
-            <Calendar className="h-5 w-5 mb-2" />
-            <span className="text-sm">Book Appointment</span>
-          </Button>
+          <BookAppointmentDialog>
+            <Button variant="outline" className="h-20 flex flex-col w-full">
+              <Calendar className="h-5 w-5 mb-2" />
+              <span className="text-sm">Book Appointment</span>
+            </Button>
+          </BookAppointmentDialog>
           <Button variant="outline" className="h-20 flex flex-col" onClick={() => navigate('/health-records')}>
             <FileText className="h-5 w-5 mb-2" />
             <span className="text-sm">Health Records</span>
@@ -31,10 +35,12 @@ const QuickActions: React.FC = () => {
             <MessageCircle className="h-5 w-5 mb-2" />
             <span className="text-sm">Chat with AI</span>
           </Button>
-          <Button variant="outline" className="h-20 flex flex-col col-span-2 bg-red-flag/5 border-red-flag/30 hover:bg-red-flag/10">
-            <MapPin className="h-5 w-5 mb-2 text-red-flag" />
-            <span className="text-sm text-red-flag font-medium">Find Cancer Screening</span>
-          </Button>
+          <CancerScreeningDialog>
+            <Button variant="outline" className="h-20 flex flex-col col-span-2 bg-red-flag/5 border-red-flag/30 hover:bg-red-flag/10 w-full">
+              <Search className="h-5 w-5 mb-2 text-red-flag" />
+              <span className="text-sm text-red-flag font-medium">Find Cancer Screening</span>
+            </Button>
+          </CancerScreeningDialog>
         </div>
       </CardContent>
     </Card>

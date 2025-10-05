@@ -1,68 +1,127 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Badge } from '@/components/ui/badge';
-import { Progress } from '@/components/ui/progress';
+import { Label } from '@/components/ui/label';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import UserAvatar from '../shared/UserAvatar';
-import { 
-  User, 
-  Mail, 
-  Phone, 
-  Building2, 
-  GraduationCap, 
-  Calendar, 
-  Award, 
-  BookOpen, 
-  FileText, 
-  Activity,
-  Edit,
-  Save,
-  X
-} from 'lucide-react';
-import { useToast } from '@/hooks/use-toast';
+import { Edit, Save, X, Award, Target, Star, TrendingUp, Clock } from 'lucide-react';
+import { Badge } from '@/components/ui/badge';
+import { toast } from 'sonner';
+import { supabase } from '@/integrations/supabase/client';
 
 interface InternProfileData {
-  name: string;
+  id: string;
+  full_name: string;
   email: string;
-  phone: string;
-  hospital: string;
-  medicalSchool: string;
-  yearOfResidency: number;
-  specialty: string;
-  supervisor: string;
-  bio: string;
-  interests: string[];
+  role: string;
+  bio?: string;
+  phone?: string;
+  specialty?: string;
+  hospital?: string;
+  years_experience?: number;
+  certifications?: string[];
+  skills?: string[];
+  learning_goals?: string[];
+  avatar_url?: string;
+  free_community_hours?: number;
+  rating?: number;
 }
 
 const InternProfile: React.FC = () => {
-  const { toast } = useToast();
   const [isEditing, setIsEditing] = useState(false);
-  const [profileData, setProfileData] = useState<InternProfileData>({
-    name: 'Alex Johnson',
-    email: 'alex.johnson@medical.edu',
-    phone: '+1 (555) 123-4567',
-    hospital: 'City General Hospital',
-    medicalSchool: 'City Medical School',
-    yearOfResidency: 2,
-    specialty: 'Internal Medicine',
-    supervisor: 'Dr. Sarah Williams',
-    bio: 'Passionate medical intern focused on AI-assisted diagnostics and patient care. Interested in oncology and palliative care.',
-    interests: ['AI Diagnostics', 'Oncology', 'Palliative Care', 'Telemedicine']
-  });
+  const [loading, setLoading] = useState(true);
+  const [saving, setSaving] = useState(false);
+  const [profileData, setProfileData] = useState<InternProfileData | null>(null);
+  const [editedData, setEditedData] = useState<InternProfileData | null>(null);
+  const [newCertification, setNewCertification] = useState('');
+  const [newSkill, setNewSkill] = useState('');
+  const [newGoal, setNewGoal] = useState('');
 
-  const [editedData, setEditedData] = useState(profileData);
+  const medicalSpecialties = [
+    'General Medicine',
+    'Cardiology',
+    'Oncology',
+    'Neurology',
+    'Pediatrics',
+    'Orthopedics',
+    'Dermatology',
+    'Psychiatry',
+    'Emergency Medicine',
+    'Internal Medicine'
+  ];
 
-  const handleSave = () => {
-    setProfileData(editedData);
-    setIsEditing(false);
-    toast({
-      title: "Profile Updated",
-      description: "Your profile has been successfully updated.",
-    });
+  useEffect(() => {
+    fetchProfile();
+  }, []);
+
+  const fetchProfile = async () => {
+    try {
+      setLoading(true);
+      const { data: { user } } = await supabase.auth.getUser();
+      
+      if (!user) {
+        toast.error('Please log in to view your profile');
+        return;
+      }
+
+      const { data: profile, error } = await supabase
+        .from('profiles')
+        .select('*')
+        .eq('id', user.id)
+        .single();
+
+      if (error) throw error;
+
+      const profileWithEmail: InternProfileData = {
+        ...profile,
+        email: user.email || '',
+      };
+
+      setProfileData(profileWithEmail);
+      setEditedData(profileWithEmail);
+    } catch (error) {
+      console.error('Error fetching profile:', error);
+      toast.error('Failed to load profile');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleSave = async () => {
+    if (!editedData) return;
+
+    try {
+      setSaving(true);
+      const { error } = await supabase
+        .from('profiles')
+        .update({
+          full_name: editedData.full_name,
+          bio: editedData.bio,
+          phone: editedData.phone,
+          specialty: editedData.specialty,
+          hospital: editedData.hospital,
+          years_experience: editedData.years_experience,
+          certifications: editedData.certifications,
+          skills: editedData.skills,
+          learning_goals: editedData.learning_goals,
+          updated_at: new Date().toISOString(),
+        })
+        .eq('id', editedData.id);
+
+      if (error) throw error;
+
+      setProfileData(editedData);
+      setIsEditing(false);
+      toast.success('Profile updated successfully');
+    } catch (error) {
+      console.error('Error updating profile:', error);
+      toast.error('Failed to update profile');
+    } finally {
+      setSaving(false);
+    }
   };
 
   const handleCancel = () => {
@@ -70,356 +129,336 @@ const InternProfile: React.FC = () => {
     setIsEditing(false);
   };
 
-  const achievements = [
-    { title: 'First AI Case Review', date: '2025-01-15', icon: Award },
-    { title: 'Completed 50 Case Studies', date: '2025-03-10', icon: BookOpen },
-    { title: 'Oncology Training Module', date: '2025-04-01', icon: Activity },
-  ];
+  const addCertification = () => {
+    if (newCertification.trim() && editedData) {
+      setEditedData({
+        ...editedData,
+        certifications: [...(editedData.certifications || []), newCertification.trim()],
+      });
+      setNewCertification('');
+    }
+  };
 
-  const learningProgress = [
-    { module: 'AI Diagnostic Interpretation', progress: 75 },
-    { module: 'Telemedicine Best Practices', progress: 90 },
-    { module: 'Electronic Health Records', progress: 40 },
-    { module: 'Oncology Diagnostics', progress: 25 },
-  ];
+  const removeCertification = (index: number) => {
+    if (editedData) {
+      const updated = [...(editedData.certifications || [])];
+      updated.splice(index, 1);
+      setEditedData({ ...editedData, certifications: updated });
+    }
+  };
+
+  const addSkill = () => {
+    if (newSkill.trim() && editedData) {
+      setEditedData({
+        ...editedData,
+        skills: [...(editedData.skills || []), newSkill.trim()],
+      });
+      setNewSkill('');
+    }
+  };
+
+  const removeSkill = (index: number) => {
+    if (editedData) {
+      const updated = [...(editedData.skills || [])];
+      updated.splice(index, 1);
+      setEditedData({ ...editedData, skills: updated });
+    }
+  };
+
+  const addGoal = () => {
+    if (newGoal.trim() && editedData) {
+      setEditedData({
+        ...editedData,
+        learning_goals: [...(editedData.learning_goals || []), newGoal.trim()],
+      });
+      setNewGoal('');
+    }
+  };
+
+  const removeGoal = (index: number) => {
+    if (editedData) {
+      const updated = [...(editedData.learning_goals || [])];
+      updated.splice(index, 1);
+      setEditedData({ ...editedData, learning_goals: updated });
+    }
+  };
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center h-96">
+        <div className="text-center">
+          <h2 className="text-2xl font-bold">Loading Profile...</h2>
+        </div>
+      </div>
+    );
+  }
+
+  if (!editedData) return null;
 
   return (
-    <div className="container mx-auto py-8 space-y-6">
-      <div className="flex justify-between items-center">
-        <h1 className="text-3xl font-bold">Intern Profile</h1>
-        {!isEditing ? (
-          <Button onClick={() => setIsEditing(true)}>
-            <Edit className="h-4 w-4 mr-2" />
-            Edit Profile
-          </Button>
-        ) : (
-          <div className="flex gap-2">
-            <Button variant="outline" onClick={handleCancel}>
-              <X className="h-4 w-4 mr-2" />
-              Cancel
-            </Button>
-            <Button onClick={handleSave}>
-              <Save className="h-4 w-4 mr-2" />
-              Save Changes
-            </Button>
+    <div className="space-y-6">
+      <Card>
+        <CardContent className="p-6">
+          <div className="flex justify-between items-start mb-4">
+            <h2 className="text-xl font-semibold">Profile Information</h2>
+            {!isEditing ? (
+              <Button onClick={() => setIsEditing(true)} size="sm">
+                <Edit className="h-4 w-4 mr-2" />
+                Edit Profile
+              </Button>
+            ) : (
+              <div className="flex gap-2">
+                <Button onClick={handleSave} size="sm" disabled={saving}>
+                  <Save className="h-4 w-4 mr-2" />
+                  {saving ? 'Saving...' : 'Save'}
+                </Button>
+                <Button onClick={handleCancel} size="sm" variant="outline" disabled={saving}>
+                  <X className="h-4 w-4 mr-2" />
+                  Cancel
+                </Button>
+              </div>
+            )}
           </div>
-        )}
-      </div>
 
-      <Tabs defaultValue="overview" className="space-y-6">
-        <TabsList className="grid w-full grid-cols-4">
-          <TabsTrigger value="overview">Overview</TabsTrigger>
-          <TabsTrigger value="education">Education</TabsTrigger>
-          <TabsTrigger value="achievements">Achievements</TabsTrigger>
-          <TabsTrigger value="progress">Progress</TabsTrigger>
+          {!isEditing ? (
+            <div className="flex flex-col md:flex-row items-start md:items-center gap-6">
+              <UserAvatar name={editedData.full_name} role="intern" size="lg" />
+              
+              <div className="flex-1">
+                <h1 className="text-2xl font-bold">{editedData.full_name}</h1>
+                <p className="text-muted-foreground">{editedData.email}</p>
+                <div className="flex items-center gap-2 text-muted-foreground mb-2 mt-2">
+                  {editedData.specialty && (
+                    <>
+                      <span>Specializing in {editedData.specialty}</span>
+                      {editedData.hospital && <span>•</span>}
+                    </>
+                  )}
+                  {editedData.hospital && <span>{editedData.hospital}</span>}
+                </div>
+                
+                <div className="flex items-center gap-4 mb-4">
+                  <div className="flex items-center">
+                    <Star className="h-4 w-4 text-yellow-500 mr-1" />
+                    <span>{editedData.rating || 0}</span>
+                  </div>
+                  <span>•</span>
+                  <div className="flex items-center">
+                    <Clock className="h-4 w-4 mr-1" />
+                    <span>{editedData.years_experience || 0} years exp.</span>
+                  </div>
+                  <span>•</span>
+                  <div className="flex items-center">
+                    <TrendingUp className="h-4 w-4 text-primary mr-1" />
+                    <span>{editedData.free_community_hours || 0} learning hours</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          ) : (
+            <div className="space-y-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label htmlFor="name">Full Name</Label>
+                  <Input
+                    id="name"
+                    value={editedData.full_name}
+                    onChange={(e) => setEditedData({...editedData, full_name: e.target.value})}
+                  />
+                </div>
+                
+                <div className="space-y-2">
+                  <Label htmlFor="phone">Phone Number</Label>
+                  <Input
+                    id="phone"
+                    type="tel"
+                    value={editedData.phone || ''}
+                    onChange={(e) => setEditedData({...editedData, phone: e.target.value})}
+                  />
+                </div>
+                
+                <div className="space-y-2">
+                  <Label htmlFor="specialty">Area of Interest</Label>
+                  <Select
+                    value={editedData.specialty || ''}
+                    onValueChange={(value) => setEditedData({...editedData, specialty: value})}
+                  >
+                    <SelectTrigger id="specialty">
+                      <SelectValue placeholder="Select specialty" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {medicalSpecialties.map((specialty) => (
+                        <SelectItem key={specialty} value={specialty}>
+                          {specialty}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+                
+                <div className="space-y-2">
+                  <Label htmlFor="hospital">Institution</Label>
+                  <Input
+                    id="hospital"
+                    value={editedData.hospital || ''}
+                    onChange={(e) => setEditedData({...editedData, hospital: e.target.value})}
+                  />
+                </div>
+                
+                <div className="space-y-2">
+                  <Label htmlFor="experience">Years of Experience</Label>
+                  <Input
+                    id="experience"
+                    type="number"
+                    value={editedData.years_experience || 0}
+                    onChange={(e) => setEditedData({...editedData, years_experience: parseInt(e.target.value) || 0})}
+                  />
+                </div>
+              </div>
+              
+              <div className="space-y-2">
+                <Label htmlFor="bio">About Me</Label>
+                <Textarea
+                  id="bio"
+                  value={editedData.bio || ''}
+                  onChange={(e) => setEditedData({...editedData, bio: e.target.value})}
+                  rows={4}
+                  placeholder="Tell us about yourself, your interests, and career goals..."
+                />
+              </div>
+            </div>
+          )}
+        </CardContent>
+      </Card>
+      
+      <Tabs defaultValue="certifications">
+        <TabsList className="grid grid-cols-3 w-full">
+          <TabsTrigger value="certifications">Certifications</TabsTrigger>
+          <TabsTrigger value="skills">Skills</TabsTrigger>
+          <TabsTrigger value="goals">Learning Goals</TabsTrigger>
         </TabsList>
-
-        <TabsContent value="overview" className="space-y-6">
+        
+        <TabsContent value="certifications" className="space-y-4 mt-4">
           <Card>
             <CardHeader>
-              <div className="flex items-center gap-4">
-                <UserAvatar name={profileData.name} role="intern" size="lg" />
-                <div>
-                  <CardTitle className="text-2xl">{profileData.name}</CardTitle>
-                  <CardDescription>Medical Intern, Year {profileData.yearOfResidency}</CardDescription>
-                </div>
-              </div>
+              <CardTitle>Certifications & Training</CardTitle>
+              <CardDescription>Add your completed certifications and training programs</CardDescription>
             </CardHeader>
-            <CardContent className="space-y-6">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div className="space-y-4">
-                  <div className="flex items-center gap-3">
-                    <Mail className="h-5 w-5 text-muted-foreground" />
-                    {isEditing ? (
-                      <div className="flex-1">
-                        <Label htmlFor="email">Email</Label>
-                        <Input
-                          id="email"
-                          value={editedData.email}
-                          onChange={(e) => setEditedData({ ...editedData, email: e.target.value })}
-                        />
-                      </div>
-                    ) : (
-                      <div>
-                        <p className="text-sm text-muted-foreground">Email</p>
-                        <p className="font-medium">{profileData.email}</p>
-                      </div>
-                    )}
-                  </div>
-
-                  <div className="flex items-center gap-3">
-                    <Phone className="h-5 w-5 text-muted-foreground" />
-                    {isEditing ? (
-                      <div className="flex-1">
-                        <Label htmlFor="phone">Phone</Label>
-                        <Input
-                          id="phone"
-                          value={editedData.phone}
-                          onChange={(e) => setEditedData({ ...editedData, phone: e.target.value })}
-                        />
-                      </div>
-                    ) : (
-                      <div>
-                        <p className="text-sm text-muted-foreground">Phone</p>
-                        <p className="font-medium">{profileData.phone}</p>
-                      </div>
-                    )}
-                  </div>
-
-                  <div className="flex items-center gap-3">
-                    <Building2 className="h-5 w-5 text-muted-foreground" />
-                    {isEditing ? (
-                      <div className="flex-1">
-                        <Label htmlFor="hospital">Hospital</Label>
-                        <Input
-                          id="hospital"
-                          value={editedData.hospital}
-                          onChange={(e) => setEditedData({ ...editedData, hospital: e.target.value })}
-                        />
-                      </div>
-                    ) : (
-                      <div>
-                        <p className="text-sm text-muted-foreground">Hospital</p>
-                        <p className="font-medium">{profileData.hospital}</p>
-                      </div>
-                    )}
-                  </div>
+            <CardContent className="space-y-4">
+              {isEditing && (
+                <div className="flex gap-2">
+                  <Input
+                    placeholder="e.g., BLS Certification, ACLS, etc."
+                    value={newCertification}
+                    onChange={(e) => setNewCertification(e.target.value)}
+                    onKeyPress={(e) => e.key === 'Enter' && addCertification()}
+                  />
+                  <Button onClick={addCertification}>Add</Button>
                 </div>
-
-                <div className="space-y-4">
-                  <div className="flex items-center gap-3">
-                    <GraduationCap className="h-5 w-5 text-muted-foreground" />
-                    {isEditing ? (
-                      <div className="flex-1">
-                        <Label htmlFor="medicalSchool">Medical School</Label>
-                        <Input
-                          id="medicalSchool"
-                          value={editedData.medicalSchool}
-                          onChange={(e) => setEditedData({ ...editedData, medicalSchool: e.target.value })}
-                        />
-                      </div>
-                    ) : (
-                      <div>
-                        <p className="text-sm text-muted-foreground">Medical School</p>
-                        <p className="font-medium">{profileData.medicalSchool}</p>
-                      </div>
-                    )}
-                  </div>
-
-                  <div className="flex items-center gap-3">
-                    <Activity className="h-5 w-5 text-muted-foreground" />
-                    {isEditing ? (
-                      <div className="flex-1">
-                        <Label htmlFor="specialty">Specialty</Label>
-                        <Input
-                          id="specialty"
-                          value={editedData.specialty}
-                          onChange={(e) => setEditedData({ ...editedData, specialty: e.target.value })}
-                        />
-                      </div>
-                    ) : (
-                      <div>
-                        <p className="text-sm text-muted-foreground">Specialty</p>
-                        <p className="font-medium">{profileData.specialty}</p>
-                      </div>
-                    )}
-                  </div>
-
-                  <div className="flex items-center gap-3">
-                    <User className="h-5 w-5 text-muted-foreground" />
-                    {isEditing ? (
-                      <div className="flex-1">
-                        <Label htmlFor="supervisor">Supervisor</Label>
-                        <Input
-                          id="supervisor"
-                          value={editedData.supervisor}
-                          onChange={(e) => setEditedData({ ...editedData, supervisor: e.target.value })}
-                        />
-                      </div>
-                    ) : (
-                      <div>
-                        <p className="text-sm text-muted-foreground">Supervisor</p>
-                        <p className="font-medium">{profileData.supervisor}</p>
-                      </div>
-                    )}
-                  </div>
-                </div>
-              </div>
-
+              )}
+              
               <div className="space-y-2">
-                {isEditing ? (
-                  <div>
-                    <Label htmlFor="bio">Bio</Label>
-                    <Textarea
-                      id="bio"
-                      value={editedData.bio}
-                      onChange={(e) => setEditedData({ ...editedData, bio: e.target.value })}
-                      rows={4}
-                    />
-                  </div>
+                {editedData.certifications && editedData.certifications.length > 0 ? (
+                  editedData.certifications.map((cert, index) => (
+                    <div key={index} className="flex items-center justify-between p-3 border rounded-md">
+                      <div className="flex items-center gap-2">
+                        <Award className="h-5 w-5 text-primary" />
+                        <span>{cert}</span>
+                      </div>
+                      {isEditing && (
+                        <Button variant="ghost" size="sm" onClick={() => removeCertification(index)}>
+                          <X className="h-4 w-4" />
+                        </Button>
+                      )}
+                    </div>
+                  ))
                 ) : (
-                  <div>
-                    <p className="text-sm text-muted-foreground mb-2">Bio</p>
-                    <p className="text-sm">{profileData.bio}</p>
-                  </div>
+                  <p className="text-muted-foreground text-center py-4">No certifications added yet</p>
                 )}
               </div>
-
-              <div className="space-y-2">
-                <p className="text-sm text-muted-foreground">Areas of Interest</p>
-                <div className="flex flex-wrap gap-2">
-                  {profileData.interests.map((interest, index) => (
-                    <Badge key={index} variant="secondary">
-                      {interest}
+            </CardContent>
+          </Card>
+        </TabsContent>
+        
+        <TabsContent value="skills" className="space-y-4 mt-4">
+          <Card>
+            <CardHeader>
+              <CardTitle>Skills & Competencies</CardTitle>
+              <CardDescription>Track your developing medical skills</CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              {isEditing && (
+                <div className="flex gap-2">
+                  <Input
+                    placeholder="e.g., Patient Assessment, Suturing, etc."
+                    value={newSkill}
+                    onChange={(e) => setNewSkill(e.target.value)}
+                    onKeyPress={(e) => e.key === 'Enter' && addSkill()}
+                  />
+                  <Button onClick={addSkill}>Add</Button>
+                </div>
+              )}
+              
+              <div className="flex flex-wrap gap-2">
+                {editedData.skills && editedData.skills.length > 0 ? (
+                  editedData.skills.map((skill, index) => (
+                    <Badge key={index} variant="secondary" className="text-sm py-2 px-3">
+                      {skill}
+                      {isEditing && (
+                        <button
+                          onClick={() => removeSkill(index)}
+                          className="ml-2 hover:text-destructive"
+                        >
+                          <X className="h-3 w-3" />
+                        </button>
+                      )}
                     </Badge>
-                  ))}
-                </div>
+                  ))
+                ) : (
+                  <p className="text-muted-foreground text-center w-full py-4">No skills added yet</p>
+                )}
               </div>
             </CardContent>
           </Card>
         </TabsContent>
-
-        <TabsContent value="education" className="space-y-6">
+        
+        <TabsContent value="goals" className="space-y-4 mt-4">
           <Card>
             <CardHeader>
-              <CardTitle>Education & Training</CardTitle>
-              <CardDescription>Your academic background and medical training</CardDescription>
+              <CardTitle>Learning Goals</CardTitle>
+              <CardDescription>Set and track your professional development goals</CardDescription>
             </CardHeader>
-            <CardContent className="space-y-6">
-              <div className="space-y-4">
-                <div className="flex items-start gap-4 p-4 border rounded-lg">
-                  <GraduationCap className="h-6 w-6 text-primary mt-1" />
-                  <div className="flex-1">
-                    <h3 className="font-semibold">{profileData.medicalSchool}</h3>
-                    <p className="text-sm text-muted-foreground">Medical Degree (M.D.)</p>
-                    <p className="text-sm text-muted-foreground">2021 - 2025</p>
-                  </div>
+            <CardContent className="space-y-4">
+              {isEditing && (
+                <div className="flex gap-2">
+                  <Input
+                    placeholder="e.g., Master ultrasound imaging techniques"
+                    value={newGoal}
+                    onChange={(e) => setNewGoal(e.target.value)}
+                    onKeyPress={(e) => e.key === 'Enter' && addGoal()}
+                  />
+                  <Button onClick={addGoal}>Add</Button>
                 </div>
-
-                <div className="flex items-start gap-4 p-4 border rounded-lg">
-                  <Building2 className="h-6 w-6 text-primary mt-1" />
-                  <div className="flex-1">
-                    <h3 className="font-semibold">{profileData.hospital}</h3>
-                    <p className="text-sm text-muted-foreground">Medical Internship - Year {profileData.yearOfResidency}</p>
-                    <p className="text-sm text-muted-foreground">Specialty: {profileData.specialty}</p>
-                    <p className="text-sm text-muted-foreground">Supervisor: {profileData.supervisor}</p>
-                  </div>
-                </div>
-              </div>
-
-              <div>
-                <h3 className="font-semibold mb-4">Certifications</h3>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div className="flex items-center gap-3 p-3 border rounded-lg">
-                    <Award className="h-5 w-5 text-primary" />
-                    <div>
-                      <p className="font-medium text-sm">Basic Life Support (BLS)</p>
-                      <p className="text-xs text-muted-foreground">Valid until 2026</p>
-                    </div>
-                  </div>
-                  <div className="flex items-center gap-3 p-3 border rounded-lg">
-                    <Award className="h-5 w-5 text-primary" />
-                    <div>
-                      <p className="font-medium text-sm">Advanced Cardiac Life Support (ACLS)</p>
-                      <p className="text-xs text-muted-foreground">Valid until 2026</p>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-        </TabsContent>
-
-        <TabsContent value="achievements" className="space-y-6">
-          <Card>
-            <CardHeader>
-              <CardTitle>Achievements & Milestones</CardTitle>
-              <CardDescription>Your accomplishments during internship</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-4">
-                {achievements.map((achievement, index) => {
-                  const Icon = achievement.icon;
-                  return (
-                    <div key={index} className="flex items-center gap-4 p-4 border rounded-lg card-hover">
-                      <div className="bg-primary/10 p-3 rounded-lg">
-                        <Icon className="h-6 w-6 text-primary" />
+              )}
+              
+              <div className="space-y-3">
+                {editedData.learning_goals && editedData.learning_goals.length > 0 ? (
+                  editedData.learning_goals.map((goal, index) => (
+                    <div key={index} className="flex items-start justify-between p-3 border rounded-md">
+                      <div className="flex items-start gap-2">
+                        <Target className="h-5 w-5 text-primary mt-0.5" />
+                        <span>{goal}</span>
                       </div>
-                      <div className="flex-1">
-                        <h3 className="font-semibold">{achievement.title}</h3>
-                        <p className="text-sm text-muted-foreground">
-                          {new Date(achievement.date).toLocaleDateString('en-US', {
-                            year: 'numeric',
-                            month: 'long',
-                            day: 'numeric'
-                          })}
-                        </p>
-                      </div>
+                      {isEditing && (
+                        <Button variant="ghost" size="sm" onClick={() => removeGoal(index)}>
+                          <X className="h-4 w-4" />
+                        </Button>
+                      )}
                     </div>
-                  );
-                })}
-              </div>
-
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-8">
-                <Card>
-                  <CardContent className="pt-6">
-                    <div className="text-center">
-                      <p className="text-3xl font-bold text-primary">78%</p>
-                      <p className="text-sm text-muted-foreground">Training Completed</p>
-                    </div>
-                  </CardContent>
-                </Card>
-                <Card>
-                  <CardContent className="pt-6">
-                    <div className="text-center">
-                      <p className="text-3xl font-bold text-primary">45</p>
-                      <p className="text-sm text-muted-foreground">Cases Observed</p>
-                    </div>
-                  </CardContent>
-                </Card>
-                <Card>
-                  <CardContent className="pt-6">
-                    <div className="text-center">
-                      <p className="text-3xl font-bold text-primary">12</p>
-                      <p className="text-sm text-muted-foreground">Cases Assisted</p>
-                    </div>
-                  </CardContent>
-                </Card>
-              </div>
-            </CardContent>
-          </Card>
-        </TabsContent>
-
-        <TabsContent value="progress" className="space-y-6">
-          <Card>
-            <CardHeader>
-              <CardTitle>Learning Progress</CardTitle>
-              <CardDescription>Track your training modules and completion status</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-6">
-                {learningProgress.map((item, index) => (
-                  <div key={index} className="space-y-2">
-                    <div className="flex justify-between items-center">
-                      <h3 className="font-medium">{item.module}</h3>
-                      <span className="text-sm text-muted-foreground">{item.progress}%</span>
-                    </div>
-                    <Progress value={item.progress} className="h-2" />
-                  </div>
-                ))}
-              </div>
-
-              <div className="mt-8 p-4 bg-muted rounded-lg">
-                <h3 className="font-semibold mb-2">Overall Progress</h3>
-                <div className="flex items-center gap-4">
-                  <div className="flex-1">
-                    <Progress value={58} className="h-3" />
-                  </div>
-                  <span className="text-lg font-bold">58%</span>
-                </div>
-                <p className="text-sm text-muted-foreground mt-2">
-                  Keep up the great work! Complete more modules to enhance your skills.
-                </p>
+                  ))
+                ) : (
+                  <p className="text-muted-foreground text-center py-4">No learning goals set yet</p>
+                )}
               </div>
             </CardContent>
           </Card>
