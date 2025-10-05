@@ -1,0 +1,258 @@
+
+import React, { createContext, useContext, useState, ReactNode } from 'react';
+
+export type Language = 'en' | 'kn' | 'hi' | 'bn' | 'ta' | 'te';
+
+interface LanguageContextType {
+  language: Language;
+  setLanguage: (lang: Language) => void;
+  t: (key: string) => string;
+}
+
+const translations = {
+  en: {
+    welcome: 'Welcome Back',
+    chooseRole: 'Choose your role to continue your healthcare journey',
+    patient: 'Patient',
+    doctor: 'Doctor',
+    intern: 'Intern',
+    signUp: 'Sign Up',
+    noAccount: "Don't have an account?",
+    advancedHealthcare: 'Advanced Healthcare with',
+    aiPowered: 'AI-Powered',
+    telemedicine: 'Telemedicine',
+    transforming: 'Transforming healthcare delivery with seamless telemedicine, AI-assisted diagnostics, and comprehensive health record management.',
+    getStarted: 'Get Started',
+    watchDemo: 'Watch Demo',
+    expertDoctors: 'Expert Doctors',
+    healthcare247: '24/7 Healthcare',
+    aiDiagnostics: 'AI-Powered Diagnostics',
+    secureRecords: 'Secure Digital Records',
+    forPatients: 'For Patients',
+    forDoctors: 'For Doctors',
+    forInterns: 'For Interns',
+    leaderboard: 'Top Contributors',
+    language: 'Language',
+    theme: 'Theme',
+    light: 'Light',
+    dark: 'Dark',
+    voiceToText: 'Voice to Text',
+    startRecording: 'Start Recording',
+    stopRecording: 'Stop Recording',
+    listening: 'Listening...',
+    heroHeadline: 'Bridging Healthcare with Humanity',
+    heroSubheadline: 'AI-powered, doctor-verified, and intern-supported care for every stage of life — from prevention to palliative.',
+    startJourney: 'Start My Health Journey',
+    joinAsProvider: 'Join as Doctor / Intern',
+    aboutTitle: 'About Jeevan Setu',
+    aboutMission: 'Jeevan Setu connects patients, doctors, and interns through verified AI healthcare, empowering faster diagnosis, continuous care, and compassion-driven outcomes.',
+    aboutCancer: 'Our AI triage and oncology modules detect early cancer signs, guide patients through diagnosis, and connect incurable cases with hospice networks for dignified comfort.',
+    aboutVision: 'Technology with empathy can heal beyond medicine.',
+    featuresTitle: 'Our Features',
+    featureSymptomChecker: 'AI Symptom Checker',
+    featureSymptomCheckerDesc: 'Instant, multilingual self-assessment',
+    featureVerification: 'Human-in-the-Loop Verification',
+    featureVerificationDesc: 'Every AI suggestion verified by real doctors',
+    featureOncologyTracker: 'Oncology Journey Tracker',
+    featureOncologyTrackerDesc: 'Monitors every step from diagnosis to care',
+    featureHospiceBridge: 'Hospice Bridge',
+    featureHospiceBridgeDesc: 'Connects terminal patients with palliative support',
+    featureInternHub: 'Intern Learning Hub',
+    featureInternHubDesc: 'Trains the next generation of medical professionals',
+    featureMultilingual: 'Multilingual Interface',
+    featureMultilingualDesc: 'Full support for English, Hindi, and regional languages',
+    hospiceTitle: 'Because Care Doesn\'t End at Cure',
+    hospiceDescription: 'For patients in advanced stages, Jeevan Setu links families with hospice networks, symptom relief programs, and emotional support systems — ensuring comfort, dignity, and continuous compassion.',
+    findHospice: 'Find a Hospice Near Me',
+    contactTitle: 'Contact Us',
+    contactName: 'Name',
+    contactEmail: 'Email',
+    contactMessage: 'Message',
+    contactSend: 'Send Message',
+    contactFooter: 'Built with ❤️ to serve Bharat\'s healthcare',
+    home: 'Home',
+    about: 'About',
+    features: 'Features',
+    contact: 'Contact',
+    login: 'Login'
+  },
+  kn: {
+    welcome: 'ಮರಳಿ ಸ್ವಾಗತ',
+    chooseRole: 'ನಿಮ್ಮ ಆರೋಗ್ಯ ಸೇವೆಯ ಪ್ರಯಾಣವನ್ನು ಮುಂದುವರಿಸಲು ನಿಮ್ಮ ಪಾತ್ರವನ್ನು ಆಯ್ಕೆಮಾಡಿ',
+    patient: 'ರೋಗಿ',
+    doctor: 'ವೈದ್ಯ',
+    intern: 'ಇಂಟರ್ನ್',
+    signUp: 'ಸೈನ್ ಅಪ್',
+    noAccount: 'ಖಾತೆ ಇಲ್ಲವೇ?',
+    advancedHealthcare: 'ಸುಧಾರಿತ ಆರೋಗ್ಯ ಸೇವೆಯೊಂದಿಗೆ',
+    aiPowered: 'AI-ಚಾಲಿತ',
+    telemedicine: 'ಟೆಲಿಮೆಡಿಸಿನ್',
+    transforming: 'ತಡೆರಹಿತ ಟೆಲಿಮೆಡಿಸಿನ್, AI-ಸಹಾಯಿತ ರೋಗನಿರ್ಣಯ ಮತ್ತು ಸಮಗ್ರ ಆರೋಗ್ಯ ದಾಖಲೆ ನಿರ್ವಹಣೆಯೊಂದಿಗೆ ಆರೋಗ್ಯ ಸೇವೆಯ ವಿತರಣೆಯನ್ನು ಪರಿವರ್ತಿಸುವುದು.',
+    getStarted: 'ಪ್ರಾರಂಭಿಸಿ',
+    watchDemo: 'ಡೆಮೋ ವೀಕ್ಷಿಸಿ',
+    expertDoctors: 'ತಜ್ಞ ವೈದ್ಯರು',
+    healthcare247: '24/7 ಆರೋಗ್ಯ ಸೇವೆ',
+    aiDiagnostics: 'AI-ಚಾಲಿತ ರೋಗನಿರ್ಣಯ',
+    secureRecords: 'ಸುರಕ್ಷಿತ ಡಿಜಿಟಲ್ ದಾಖಲೆಗಳು',
+    forPatients: 'ರೋಗಿಗಳಿಗಾಗಿ',
+    forDoctors: 'ವೈದ್ಯರಿಗಾಗಿ',
+    forInterns: 'ಇಂಟರ್ನ್‌ಗಳಿಗಾಗಿ',
+    leaderboard: 'ಪ್ರಮುಖ ಕೊಡುಗೆದಾರರು',
+    language: 'ಭಾಷೆ',
+    theme: 'ಥೀಮ್',
+    light: 'ಬೆಳಕು',
+    dark: 'ಗಾಢ',
+    voiceToText: 'ಧ್ವನಿಯಿಂದ ಪಠ್ಯಕ್ಕೆ',
+    startRecording: 'ರೆಕಾರ್ಡಿಂಗ್ ಪ್ರಾರಂಭಿಸಿ',
+    stopRecording: 'ರೆಕಾರ್ಡಿಂಗ್ ನಿಲ್ಲಿಸಿ',
+    listening: 'ಕೇಳುತ್ತಿದೆ...'
+  },
+  hi: {
+    welcome: 'वापसी पर स्वागत है',
+    chooseRole: 'अपनी स्वास्थ्य सेवा यात्रा जारी रखने के लिए अपनी भूमिका चुनें',
+    patient: 'मरीज़',
+    doctor: 'डॉक्टर',
+    intern: 'इंटर्न',
+    signUp: 'साइन अप',
+    noAccount: 'कोई खाता नहीं है?',
+    advancedHealthcare: 'उन्नत स्वास्थ्य सेवा के साथ',
+    aiPowered: 'AI-संचालित',
+    telemedicine: 'टेलीमेडिसिन',
+    transforming: 'निर्बाध टेलीमेडिसिन, AI-सहायता प्राप्त निदान, और व्यापक स्वास्थ्य रिकॉर्ड प्रबंधन के साथ स्वास्थ्य सेवा वितरण को बदलना।',
+    getStarted: 'शुरू करें',
+    watchDemo: 'डेमो देखें',
+    expertDoctors: 'विशेषज्ञ डॉक्टर',
+    healthcare247: '24/7 स्वास्थ्य सेवा',
+    aiDiagnostics: 'AI-संचालित निदान',
+    secureRecords: 'सुरक्षित डिजिटल रिकॉर्ड',
+    forPatients: 'मरीज़ों के लिए',
+    forDoctors: 'डॉक्टरों के लिए',
+    forInterns: 'इंटर्न के लिए',
+    leaderboard: 'शीर्ष योगदानकर्ता',
+    language: 'भाषा',
+    theme: 'थीम',
+    light: 'उजला',
+    dark: 'अंधेरा',
+    voiceToText: 'आवाज़ से टेक्स्ट',
+    startRecording: 'रिकॉर्डिंग शुरू करें',
+    stopRecording: 'रिकॉर्डिंग बंद करें',
+    listening: 'सुन रहा है...'
+  },
+  bn: {
+    welcome: 'ফিরে স্বাগতম',
+    chooseRole: 'আপনার স্বাস্থ্যসেবা যাত্রা অব্যাহত রাখতে আপনার ভূমিকা বেছে নিন',
+    patient: 'রোগী',
+    doctor: 'ডাক্তার',
+    intern: 'ইন্টার্ন',
+    signUp: 'সাইন আপ',
+    noAccount: 'কোন অ্যাকাউন্ট নেই?',
+    advancedHealthcare: 'উন্নত স্বাস্থ্যসেবা সহ',
+    aiPowered: 'AI-চালিত',
+    telemedicine: 'টেলিমেডিসিন',
+    transforming: 'নির্বিঘ্ন টেলিমেডিসিন, AI-সহায়তা প্রাপ্ত নির্ণয়, এবং ব্যাপক স্বাস্থ্য রেকর্ড ব্যবস্থাপনার সাথে স্বাস্থ্যসেবা বিতরণ রূপান্তরিত করা।',
+    getStarted: 'শুরু করুন',
+    watchDemo: 'ডেমো দেখুন',
+    expertDoctors: 'বিশেষজ্ঞ ডাক্তার',
+    healthcare247: '24/7 স্বাস্থ্যসেবা',
+    aiDiagnostics: 'AI-চালিত নির্ণয়',
+    secureRecords: 'নিরাপদ ডিজিটাল রেকর্ড',
+    forPatients: 'রোগীদের জন্য',
+    forDoctors: 'ডাক্তারদের জন্য',
+    forInterns: 'ইন্টার্নদের জন্য',
+    leaderboard: 'শীর্ষ অবদানকারী',
+    language: 'ভাষা',
+    theme: 'থিম',
+    light: 'হালকা',
+    dark: 'অন্ধকার',
+    voiceToText: 'ভয়েস টু টেক্সট',
+    startRecording: 'রেকর্ডিং শুরু করুন',
+    stopRecording: 'রেকর্ডিং বন্ধ করুন',
+    listening: 'শুনছে...'
+  },
+  ta: {
+    welcome: 'மீண்டும் வரவேற்கிறோம்',
+    chooseRole: 'உங்கள் சுகாதார பயணத்தைத் தொடர உங்கள் பாத்திரத்தைத் தேர்ந்தெடுக்கவும்',
+    patient: 'நோயாளி',
+    doctor: 'மருத்துவர்',
+    intern: 'இன்டர்ன்',
+    signUp: 'பதிவு செய்யவும்',
+    noAccount: 'கணக்கு இல்லையா?',
+    advancedHealthcare: 'மேம்பட்ட சுகாதாரத்துடன்',
+    aiPowered: 'AI-இயங்கும்',
+    telemedicine: 'டெலிமெடிசின்',
+    transforming: 'தடையற்ற டெலிமெடிசின், AI-உதவி கண்டறிதல் மற்றும் விரிவான சுகாதார பதிவு மேலாண்மையுடன் சுகாதார வழங்கலை மாற்றுதல்।',
+    getStarted: 'தொடங்குங்கள்',
+    watchDemo: 'டெமோ பார்க்கவும்',
+    expertDoctors: 'நிபுணர் மருத்துவர்கள்',
+    healthcare247: '24/7 சுகாதாரம்',
+    aiDiagnostics: 'AI-இயங்கும் கண்டறிதல்',
+    secureRecords: 'பாதுகாப்பான டிஜிட்டல் பதிவுகள்',
+    forPatients: 'நோயாளிகளுக்கு',
+    forDoctors: 'மருத்துவர்களுக்கு',
+    forInterns: 'இன்டர்ன்களுக்கு',
+    leaderboard: 'முதன்மை பங்களிப்பாளர்கள்',
+    language: 'மொழி',
+    theme: 'தீம்',
+    light: 'வெளிச்சம்',
+    dark: 'இருள்',
+    voiceToText: 'குரலிலிருந்து உரைக்கு',
+    startRecording: 'பதிவு தொடங்கவும்',
+    stopRecording: 'பதிவு நிறுத்தவும்',
+    listening: 'கேட்டுக்கொண்டிருக்கிறது...'
+  },
+  te: {
+    welcome: 'తిరిగి స్వాగతం',
+    chooseRole: 'మీ ఆరోగ్య సేవా ప్రయాణాన్ని కొనసాగించడానికి మీ పాత్రను ఎంచుకోండి',
+    patient: 'రోగి',
+    doctor: 'వైద్యుడు',
+    intern: 'ఇంటర్న్',
+    signUp: 'సైన్ అప్',
+    noAccount: 'ఖాతా లేదా?',
+    advancedHealthcare: 'అధునాతన ఆరోగ్య సేవతో',
+    aiPowered: 'AI-శక్తితో',
+    telemedicine: 'టెలిమెడిసిన్',
+    transforming: 'అంతరాయం లేని టెలిమెడిసిన్, AI-సహాయక నిర్ధారణ మరియు సమగ్ర ఆరోగ్య రికార్డు నిర్వహణతో ఆరోగ్య సేవా పంపిణీని మార్చడం।',
+    getStarted: 'ప్రారంభించండి',
+    watchDemo: 'డెమో చూడండి',
+    expertDoctors: 'నిపుణ వైద్యులు',
+    healthcare247: '24/7 ఆరోగ్య సేవ',
+    aiDiagnostics: 'AI-శక్తితో నిర్ధారణ',
+    secureRecords: 'సురక్షిత డిజిటల్ రికార్డులు',
+    forPatients: 'రోగుల కోసం',
+    forDoctors: 'వైద్యుల కోసం',
+    forInterns: 'ఇంటర్న్ల కోసం',
+    leaderboard: 'ప్రధాన సహకారులు',
+    language: 'భాష',
+    theme: 'థీమ్',
+    light: 'కాంతి',
+    dark: 'చీకటి',
+    voiceToText: 'వాయిస్ టు టెక్స్ట్',
+    startRecording: 'రికార్డింగ్ ప్రారంభించండి',
+    stopRecording: 'రికార్డింగ్ ఆపండి',
+    listening: 'వింటున్నాను...'
+  }
+};
+
+const LanguageContext = createContext<LanguageContextType | undefined>(undefined);
+
+export const LanguageProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
+  const [language, setLanguage] = useState<Language>('en');
+
+  const t = (key: string): string => {
+    return translations[language][key as keyof typeof translations['en']] || key;
+  };
+
+  return (
+    <LanguageContext.Provider value={{ language, setLanguage, t }}>
+      {children}
+    </LanguageContext.Provider>
+  );
+};
+
+export const useLanguage = () => {
+  const context = useContext(LanguageContext);
+  if (context === undefined) {
+    throw new Error('useLanguage must be used within a LanguageProvider');
+  }
+  return context;
+};
