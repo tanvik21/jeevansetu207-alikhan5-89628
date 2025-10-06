@@ -6,6 +6,7 @@ import { useNavigate } from 'react-router-dom';
 import UserAvatar from '../shared/UserAvatar';
 import Leaderboard from '../shared/Leaderboard';
 import CertificationBadges from './components/CertificationBadges';
+import VerificationQueue from './components/VerificationQueue';
 import { Award, BookOpen, Brain, Calendar, Clock, FileCheck, UserCheck, FileText, GraduationCap, Activity, CheckCircle } from 'lucide-react';
 import { Progress } from '@/components/ui/progress';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -333,6 +334,8 @@ const InternDashboard: React.FC = () => {
               </Tabs>
             </CardContent>
           </Card>
+          
+          <VerificationQueue />
           
           <Card>
             <CardHeader>

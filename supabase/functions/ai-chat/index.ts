@@ -98,8 +98,47 @@ serve(async (req) => {
       content: assistantMessage,
     });
 
+    // Determine if this is a medical symptom query that should create an AI report
+    const isMedicalQuery = message.toLowerCase().match(/(pain|fever|symptom|sick|hurt|ache|dizzy|nausea|vomit|cough|cancer|tumor|lump|bleeding|swelling)/);
+    
+    let reportInfo = null;
+    if (isMedicalQuery) {
+      // Generate a prediction based on the conversation
+      const predictionResponse = await fetch('https://ai.gateway.lovable.dev/v1/chat/completions', {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${LOVABLE_API_KEY}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          model: 'google/gemini-2.5-flash',
+          messages: [
+            {
+              role: 'system',
+              content: 'Based on the patient symptoms, provide a brief medical assessment in 2-3 sentences. Include potential conditions to investigate and urgency level. Be professional and cautious.',
+            },
+            { role: 'user', content: `Patient reported: ${message}` },
+          ],
+        }),
+      });
+      
+      if (predictionResponse.ok) {
+        const predictionData = await predictionResponse.json();
+        const prediction = predictionData.choices[0].message.content;
+        
+        reportInfo = {
+          createReport: true,
+          prediction,
+          confidence: 0.75,
+        };
+      }
+    }
+
     return new Response(
-      JSON.stringify({ message: assistantMessage }),
+      JSON.stringify({ 
+        message: assistantMessage,
+        ...reportInfo 
+      }),
       { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     );
   } catch (error) {

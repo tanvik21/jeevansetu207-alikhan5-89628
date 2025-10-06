@@ -142,7 +142,7 @@ const Index = () => {
                 
                 <h1 className="text-5xl md:text-6xl font-bold leading-tight">
                   <span className="bg-gradient-to-r from-slate-900 via-slate-800 to-slate-900 dark:from-slate-100 dark:via-slate-200 dark:to-slate-100 bg-clip-text text-transparent">
-                    {t('heroHeadline')}
+                    Advanced healthcare with AI-powered Telemedicine
                   </span>
                 </h1>
                 

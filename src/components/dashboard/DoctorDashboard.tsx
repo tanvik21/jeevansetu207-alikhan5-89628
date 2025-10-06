@@ -8,6 +8,7 @@ import PatientJourneyMap from './components/PatientJourneyMap';
 import HospiceReferralPanel from './components/HospiceReferralPanel';
 import SymptomBurdenTracker from './components/SymptomBurdenTracker';
 import CollaborationTools from './components/CollaborationTools';
+import ReviewVerifyPanel from './components/ReviewVerifyPanel';
 import { 
   Brain, 
   Calendar, 
@@ -267,6 +268,8 @@ const DoctorDashboard: React.FC = () => {
           </div>
         </CardContent>
       </Card>
+
+      <ReviewVerifyPanel />
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* Patient Journey Map */}

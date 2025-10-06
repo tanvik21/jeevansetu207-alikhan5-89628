@@ -11,6 +11,7 @@ import HealthRecordsList from './components/HealthRecordsList';
 import AIHealthAssistant from './components/AIHealthAssistant';
 import CancerCareJourney from './components/CancerCareJourney';
 import BookAppointmentDialog from '@/components/appointments/BookAppointmentDialog';
+import MyAIReports from './components/MyAIReports';
 
 const PatientDashboard: React.FC = () => {
   const [activeTab, setActiveTab] = useState('overview');
@@ -46,6 +47,7 @@ const PatientDashboard: React.FC = () => {
             
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
               <div className="lg:col-span-2 space-y-6">
+                <MyAIReports />
                 <AppointmentList />
                 <HealthRecordsList />
               </div>

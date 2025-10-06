@@ -71,6 +71,19 @@ const AIHealthAssistant = () => {
       
       if (data?.message) {
         setMessages(prev => [...prev, { role: 'assistant', content: data.message }]);
+        
+        // Create AI report case file for medical queries
+        if (data.createReport && data.prediction) {
+          await supabase.from('ai_reports').insert({
+            patient_id: userId,
+            symptoms: userMessage,
+            ai_prediction: data.prediction,
+            confidence_score: data.confidence || 0.75,
+            documents: [],
+            status: 'generated'
+          });
+          toast.success('AI Case File created for verification');
+        }
       }
     } catch (error: any) {
       console.error('AI chat error:', error);
