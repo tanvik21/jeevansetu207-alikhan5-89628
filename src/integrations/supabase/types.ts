@@ -38,6 +38,83 @@ export type Database = {
         }
         Relationships: []
       }
+      ai_reports: {
+        Row: {
+          ai_prediction: string
+          confidence_score: number | null
+          created_at: string | null
+          documents: string[] | null
+          id: string
+          patient_id: string
+          status: string
+          symptoms: string
+          updated_at: string | null
+        }
+        Insert: {
+          ai_prediction: string
+          confidence_score?: number | null
+          created_at?: string | null
+          documents?: string[] | null
+          id?: string
+          patient_id: string
+          status?: string
+          symptoms: string
+          updated_at?: string | null
+        }
+        Update: {
+          ai_prediction?: string
+          confidence_score?: number | null
+          created_at?: string | null
+          documents?: string[] | null
+          id?: string
+          patient_id?: string
+          status?: string
+          symptoms?: string
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
+      doctor_verifications: {
+        Row: {
+          action: string
+          created_at: string | null
+          doctor_id: string
+          feedback: string | null
+          id: string
+          report_id: string
+          verified_at: string | null
+          verified_summary: string | null
+        }
+        Insert: {
+          action: string
+          created_at?: string | null
+          doctor_id: string
+          feedback?: string | null
+          id?: string
+          report_id: string
+          verified_at?: string | null
+          verified_summary?: string | null
+        }
+        Update: {
+          action?: string
+          created_at?: string | null
+          doctor_id?: string
+          feedback?: string | null
+          id?: string
+          report_id?: string
+          verified_at?: string | null
+          verified_summary?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "doctor_verifications_report_id_fkey"
+            columns: ["report_id"]
+            isOneToOne: false
+            referencedRelation: "ai_reports"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       health_records: {
         Row: {
           attachments: string[] | null
@@ -79,6 +156,47 @@ export type Database = {
           user_id?: string
         }
         Relationships: []
+      }
+      intern_reviews: {
+        Row: {
+          corrections: string | null
+          created_at: string | null
+          forwarded_to_doctor: boolean | null
+          id: string
+          intern_id: string
+          notes: string | null
+          report_id: string
+          verified_at: string | null
+        }
+        Insert: {
+          corrections?: string | null
+          created_at?: string | null
+          forwarded_to_doctor?: boolean | null
+          id?: string
+          intern_id: string
+          notes?: string | null
+          report_id: string
+          verified_at?: string | null
+        }
+        Update: {
+          corrections?: string | null
+          created_at?: string | null
+          forwarded_to_doctor?: boolean | null
+          id?: string
+          intern_id?: string
+          notes?: string | null
+          report_id?: string
+          verified_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "intern_reviews_report_id_fkey"
+            columns: ["report_id"]
+            isOneToOne: false
+            referencedRelation: "ai_reports"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       profiles: {
         Row: {
@@ -154,15 +272,42 @@ export type Database = {
           },
         ]
       }
+      user_roles: {
+        Row: {
+          created_at: string | null
+          id: string
+          role: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          role: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          role?: Database["public"]["Enums"]["app_role"]
+          user_id?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      has_role: {
+        Args: {
+          _role: Database["public"]["Enums"]["app_role"]
+          _user_id: string
+        }
+        Returns: boolean
+      }
     }
     Enums: {
-      [_ in never]: never
+      app_role: "admin" | "doctor" | "intern" | "patient"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -289,6 +434,8 @@ export type CompositeTypes<
 
 export const Constants = {
   public: {
-    Enums: {},
+    Enums: {
+      app_role: ["admin", "doctor", "intern", "patient"],
+    },
   },
 } as const
