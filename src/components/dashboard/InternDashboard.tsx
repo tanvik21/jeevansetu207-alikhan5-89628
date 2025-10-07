@@ -1,5 +1,5 @@
 
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { useNavigate } from 'react-router-dom';
@@ -10,9 +10,62 @@ import VerificationQueue from './components/VerificationQueue';
 import { Award, BookOpen, Brain, Calendar, Clock, FileCheck, UserCheck, FileText, GraduationCap, Activity, CheckCircle } from 'lucide-react';
 import { Progress } from '@/components/ui/progress';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { supabase } from '@/integrations/supabase/client';
 
 const InternDashboard: React.FC = () => {
   const navigate = useNavigate();
+  const [userName, setUserName] = useState('Loading...');
+  const [userInfo, setUserInfo] = useState({ studyYear: 0, hospital: 'Loading...' });
+  
+  useEffect(() => {
+    const fetchUserProfile = async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      
+      if (user) {
+        const { data: profile } = await supabase
+          .from('profiles')
+          .select('full_name, study_year, hospital')
+          .eq('id', user.id)
+          .single();
+        
+        if (profile) {
+          setUserName(profile.full_name);
+          setUserInfo({
+            studyYear: profile.study_year || 0,
+            hospital: profile.hospital || 'Medical School'
+          });
+        }
+      }
+    };
+    
+    fetchUserProfile();
+
+    // Subscribe to profile changes
+    const channel = supabase
+      .channel('intern-dashboard-profile')
+      .on(
+        'postgres_changes',
+        {
+          event: 'UPDATE',
+          schema: 'public',
+          table: 'profiles'
+        },
+        (payload) => {
+          if (payload.new) {
+            setUserName(payload.new.full_name);
+            setUserInfo({
+              studyYear: payload.new.study_year || 0,
+              hospital: payload.new.hospital || 'Medical School'
+            });
+          }
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, []);
   
   // Mock data
   const trainingModules = [
@@ -108,7 +161,7 @@ const InternDashboard: React.FC = () => {
     <div className="space-y-6">
       <div className="flex justify-between items-center">
         <h1 className="text-3xl font-bold">Medical Intern Dashboard</h1>
-        <Button onClick={() => navigate('/intern-profile')}>
+        <Button onClick={() => navigate('/profile')}>
           <Calendar className="h-4 w-4 mr-2" />
           View My Profile
         </Button>
@@ -119,14 +172,14 @@ const InternDashboard: React.FC = () => {
           <CardContent className="pt-6">
             <div className="flex justify-between items-start">
               <div>
-                <h2 className="text-lg font-medium">Alex Johnson</h2>
-                <p className="text-muted-foreground text-white/80">Medical Intern, Year 2</p>
+                <h2 className="text-lg font-medium">{userName}</h2>
+                <p className="text-muted-foreground text-white/80">Medical Intern{userInfo.studyYear > 0 ? `, Year ${userInfo.studyYear}` : ''}</p>
                 <div className="flex items-center mt-1">
                   <GraduationCap className="h-4 w-4 mr-1" />
-                  <span className="text-sm">City Medical School</span>
+                  <span className="text-sm">{userInfo.hospital}</span>
                 </div>
               </div>
-              <UserAvatar name="Alex Johnson" role="intern" size="lg" />
+              <UserAvatar name={userName} role="intern" size="lg" />
             </div>
             <div className="mt-6 grid grid-cols-3 gap-4">
               <div className="bg-white/20 rounded-lg p-3 text-center">

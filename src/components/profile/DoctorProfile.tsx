@@ -46,6 +46,41 @@ const DoctorProfile: React.FC<DoctorProfileProps> = ({ doctor = mockDoctor }) =>
 
   useEffect(() => {
     fetchProfile();
+
+    // Subscribe to profile changes for real-time updates
+    const channel = supabase
+      .channel('doctor-profile-changes')
+      .on(
+        'postgres_changes',
+        {
+          event: 'UPDATE',
+          schema: 'public',
+          table: 'profiles'
+        },
+        (payload) => {
+          if (payload.new && payload.new.id === profileData?.id) {
+            const updatedProfile: Doctor = {
+              ...profileData,
+              name: payload.new.full_name,
+              bio: payload.new.bio || profileData.bio,
+              specialty: payload.new.specialty || profileData.specialty,
+              hospital: payload.new.hospital || profileData.hospital,
+              yearsExperience: payload.new.years_experience || profileData.yearsExperience,
+              education: payload.new.education || profileData.education,
+              availability: payload.new.availability || profileData.availability,
+              freeCommunityHours: payload.new.free_community_hours || profileData.freeCommunityHours,
+              rating: payload.new.rating || profileData.rating
+            };
+            setProfileData(updatedProfile);
+            setEditedDoctor(updatedProfile);
+          }
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
   }, []);
 
   const fetchProfile = async () => {

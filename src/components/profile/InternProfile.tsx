@@ -22,6 +22,7 @@ interface InternProfileData {
   specialty?: string;
   hospital?: string;
   years_experience?: number;
+  study_year?: number;
   certifications?: string[];
   skills?: string[];
   learning_goals?: string[];
@@ -55,6 +56,33 @@ const InternProfile: React.FC = () => {
 
   useEffect(() => {
     fetchProfile();
+
+    // Subscribe to profile changes for real-time updates
+    const channel = supabase
+      .channel('intern-profile-changes')
+      .on(
+        'postgres_changes',
+        {
+          event: 'UPDATE',
+          schema: 'public',
+          table: 'profiles'
+        },
+        (payload) => {
+          if (payload.new) {
+            const updatedProfile: InternProfileData = {
+              ...payload.new as any,
+              email: profileData?.email || ''
+            };
+            setProfileData(updatedProfile);
+            setEditedData(updatedProfile);
+          }
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
   }, []);
 
   const fetchProfile = async () => {
@@ -104,6 +132,7 @@ const InternProfile: React.FC = () => {
           specialty: editedData.specialty,
           hospital: editedData.hospital,
           years_experience: editedData.years_experience,
+          study_year: editedData.study_year,
           certifications: editedData.certifications,
           skills: editedData.skills,
           learning_goals: editedData.learning_goals,
@@ -228,6 +257,12 @@ const InternProfile: React.FC = () => {
                 <h1 className="text-2xl font-bold">{editedData.full_name}</h1>
                 <p className="text-muted-foreground">{editedData.email}</p>
                 <div className="flex items-center gap-2 text-muted-foreground mb-2 mt-2">
+                  {editedData.study_year && (
+                    <>
+                      <span>MBBS Year {editedData.study_year}</span>
+                      {(editedData.specialty || editedData.hospital) && <span>•</span>}
+                    </>
+                  )}
                   {editedData.specialty && (
                     <>
                       <span>Specializing in {editedData.specialty}</span>
@@ -313,6 +348,25 @@ const InternProfile: React.FC = () => {
                     value={editedData.years_experience || 0}
                     onChange={(e) => setEditedData({...editedData, years_experience: parseInt(e.target.value) || 0})}
                   />
+                </div>
+                
+                <div className="space-y-2">
+                  <Label htmlFor="study_year">MBBS Study Year</Label>
+                  <Select
+                    value={editedData.study_year?.toString() || ''}
+                    onValueChange={(value) => setEditedData({...editedData, study_year: parseInt(value)})}
+                  >
+                    <SelectTrigger id="study_year">
+                      <SelectValue placeholder="Select year" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="1">Year 1</SelectItem>
+                      <SelectItem value="2">Year 2</SelectItem>
+                      <SelectItem value="3">Year 3</SelectItem>
+                      <SelectItem value="4">Year 4</SelectItem>
+                      <SelectItem value="5">Year 5</SelectItem>
+                    </SelectContent>
+                  </Select>
                 </div>
               </div>
               

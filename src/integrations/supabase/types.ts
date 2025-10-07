@@ -216,6 +216,7 @@ export type Database = {
           role: string
           skills: string[] | null
           specialty: string | null
+          study_year: number | null
           supervisor_id: string | null
           updated_at: string
           years_experience: number | null
@@ -237,6 +238,7 @@ export type Database = {
           role: string
           skills?: string[] | null
           specialty?: string | null
+          study_year?: number | null
           supervisor_id?: string | null
           updated_at?: string
           years_experience?: number | null
@@ -258,6 +260,7 @@ export type Database = {
           role?: string
           skills?: string[] | null
           specialty?: string | null
+          study_year?: number | null
           supervisor_id?: string | null
           updated_at?: string
           years_experience?: number | null
