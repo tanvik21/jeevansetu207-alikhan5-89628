@@ -6,6 +6,7 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 import { Bot, User, Send } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
+import { useLanguage } from '@/contexts/LanguageContext';
 
 interface Message {
   role: 'user' | 'assistant';
@@ -13,6 +14,7 @@ interface Message {
 }
 
 const AIHealthAssistant = () => {
+  const { t } = useLanguage();
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
@@ -98,10 +100,10 @@ const AIHealthAssistant = () => {
       <CardHeader className="pb-3">
         <CardTitle className="text-lg flex items-center gap-2">
           <Bot className="h-5 w-5 text-primary" />
-          AI Health Assistant
+          {t('aiHealthAssistant')}
         </CardTitle>
         <CardDescription>
-          Hello {userName}! Ask me health-related questions
+          {t('welcome')} {userName}! {t('askHealthQuestion')}
         </CardDescription>
       </CardHeader>
       <CardContent className="flex-1 min-h-0 flex flex-col gap-4 p-4">
@@ -109,7 +111,7 @@ const AIHealthAssistant = () => {
           <div className="space-y-4">
             {messages.length === 0 && (
               <div className="text-center text-muted-foreground py-8">
-                <p>Start a conversation with your AI health assistant</p>
+                <p>{t('startConversation')}</p>
               </div>
             )}
             {messages.map((message, index) => (
@@ -146,7 +148,7 @@ const AIHealthAssistant = () => {
                   <Bot className="h-4 w-4 text-primary" />
                 </div>
                 <div className="rounded-lg px-4 py-2 bg-muted">
-                  <p className="text-sm">Thinking...</p>
+                  <p className="text-sm">{t('thinking')}</p>
                 </div>
               </div>
             )}
@@ -157,7 +159,7 @@ const AIHealthAssistant = () => {
             value={input}
             onChange={(e) => setInput(e.target.value)}
             onKeyPress={(e) => e.key === 'Enter' && handleSend()}
-            placeholder="Ask about symptoms, health tips..."
+            placeholder={t('askHealthQuestion')}
             disabled={isLoading || !userId}
           />
           <Button
