@@ -19,6 +19,7 @@ import {
 } from 'lucide-react';
 import { Progress } from '@/components/ui/progress';
 import { toast } from 'sonner';
+import { supabase } from '@/integrations/supabase/client';
 
 // Mock AI analysis response
 const mockAnalysis: AIAnalysis = {
@@ -43,6 +44,7 @@ const SymptomChecker: React.FC = () => {
   const [analysisResult, setAnalysisResult] = useState<AIAnalysis | null>(null);
   const [activeTab, setActiveTab] = useState('text');
   const [showOncologyAlert, setShowOncologyAlert] = useState(false);
+  const [generatedReportId, setGeneratedReportId] = useState<string | null>(null);
   
   // Oncology keywords detection
   const oncologyKeywords = ['lump', 'chronic cough', 'weight loss', 'unexplained', 'tumor', 'mass', 'cancer', 'swelling', 'bleeding'];
@@ -52,7 +54,7 @@ const SymptomChecker: React.FC = () => {
     return oncologyKeywords.some(keyword => lowerText.includes(keyword));
   };
   
-  const handleAnalyze = () => {
+  const handleAnalyze = async () => {
     if (!symptoms.trim()) {
       toast.error('Please describe your symptoms first');
       return;
@@ -60,17 +62,50 @@ const SymptomChecker: React.FC = () => {
     
     setIsAnalyzing(true);
     
-    // Simulate API call
-    setTimeout(() => {
-      setAnalysisResult(mockAnalysis);
-      setIsAnalyzing(false);
-      toast.success('Analysis complete - redirecting to dashboard');
+    try {
+      // Get current user
+      const { data: { user } } = await supabase.auth.getUser();
       
-      // Redirect to dashboard after analysis
-      setTimeout(() => {
-        navigate('/dashboard');
-      }, 1500);
-    }, 2000);
+      if (!user) {
+        toast.error('Please log in to use this feature');
+        setIsAnalyzing(false);
+        return;
+      }
+      
+      // Simulate AI analysis
+      await new Promise(resolve => setTimeout(resolve, 2000));
+      
+      // Create AI report in database
+      const { data: report, error } = await supabase
+        .from('ai_reports')
+        .insert({
+          patient_id: user.id,
+          symptoms: symptoms,
+          ai_prediction: 'Common Cold (85%), Influenza (65%), Sinusitis (40%)',
+          confidence_score: 0.85,
+          status: 'generated',
+          documents: []
+        })
+        .select()
+        .single();
+      
+      if (error) {
+        console.error('Error creating report:', error);
+        toast.error('Failed to create AI report');
+        setIsAnalyzing(false);
+        return;
+      }
+      
+      // Set the analysis result and report ID
+      setAnalysisResult(mockAnalysis);
+      setGeneratedReportId(report.id);
+      setIsAnalyzing(false);
+      toast.success('Analysis complete! Your report has been generated.');
+    } catch (error) {
+      console.error('Error during analysis:', error);
+      toast.error('An error occurred during analysis');
+      setIsAnalyzing(false);
+    }
   };
   
   const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -316,12 +351,24 @@ const SymptomChecker: React.FC = () => {
             )}
           </CardContent>
           <CardFooter className="flex flex-col sm:flex-row gap-3">
-            <Button className="w-full sm:w-auto">
-              <Stethoscope className="mr-2 h-4 w-4" />
-              Consult a Doctor
+            <Button 
+              className="w-full sm:w-auto"
+              onClick={() => navigate('/dashboard')}
+            >
+              <ArrowRight className="mr-2 h-4 w-4" />
+              View My Reports
             </Button>
-            <Button variant="outline" className="w-full sm:w-auto">
-              Save to Health Records
+            <Button 
+              variant="outline" 
+              className="w-full sm:w-auto"
+              onClick={() => {
+                setSymptoms('');
+                setAnalysisResult(null);
+                setGeneratedReportId(null);
+                toast.success('Ready for new analysis');
+              }}
+            >
+              New Analysis
             </Button>
           </CardFooter>
         </Card>

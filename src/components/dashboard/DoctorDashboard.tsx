@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -9,6 +9,7 @@ import HospiceReferralPanel from './components/HospiceReferralPanel';
 import SymptomBurdenTracker from './components/SymptomBurdenTracker';
 import CollaborationTools from './components/CollaborationTools';
 import ReviewVerifyPanel from './components/ReviewVerifyPanel';
+import { supabase } from '@/integrations/supabase/client';
 import { 
   Brain, 
   Calendar, 
@@ -42,6 +43,52 @@ interface PatientCase {
 
 const DoctorDashboard: React.FC = () => {
   const [filterLabel, setFilterLabel] = useState<string>('all');
+  const [userName, setUserName] = useState('Loading...');
+  const [userSpecialty, setUserSpecialty] = useState('Doctor');
+  
+  useEffect(() => {
+    const fetchUserProfile = async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      
+      if (user) {
+        const { data: profile } = await supabase
+          .from('profiles')
+          .select('full_name, specialty')
+          .eq('id', user.id)
+          .single();
+        
+        if (profile) {
+          setUserName(profile.full_name);
+          setUserSpecialty(profile.specialty || 'Oncology Specialist');
+        }
+      }
+    };
+    
+    fetchUserProfile();
+
+    // Subscribe to profile changes
+    const channel = supabase
+      .channel('doctor-dashboard-profile')
+      .on(
+        'postgres_changes',
+        {
+          event: 'UPDATE',
+          schema: 'public',
+          table: 'profiles'
+        },
+        (payload) => {
+          if (payload.new) {
+            setUserName(payload.new.full_name);
+            setUserSpecialty(payload.new.specialty || 'Oncology Specialist');
+          }
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, []);
   
   // Mock patient cases with oncology data
   const patientCases: PatientCase[] = [
@@ -142,14 +189,14 @@ const DoctorDashboard: React.FC = () => {
         <CardContent className="pt-6">
           <div className="flex justify-between items-start">
             <div>
-              <h2 className="text-xl font-semibold">Dr. Jane Smith</h2>
-              <p className="text-white/90">Oncology Specialist</p>
+              <h2 className="text-xl font-semibold">{userName}</h2>
+              <p className="text-white/90">{userSpecialty}</p>
               <div className="flex items-center mt-2">
                 <UserCheck className="h-4 w-4 mr-1" />
                 <span className="text-sm">Verified Oncologist</span>
               </div>
             </div>
-            <UserAvatar name="Dr. Jane Smith" role="doctor" size="lg" />
+            <UserAvatar name={userName} role="doctor" size="lg" />
           </div>
           <div className="mt-6 grid grid-cols-3 gap-4">
             <div className="bg-white/20 rounded-lg p-3 text-center backdrop-blur-sm">
