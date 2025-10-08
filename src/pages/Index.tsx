@@ -87,7 +87,7 @@ const Index = () => {
                 onClick={() => scrollToSection('hospice')} 
                 className="text-sm font-medium text-slate-600 dark:text-slate-300 hover:text-primary transition-colors"
               >
-                Hospice
+                {t('hospice')}
               </button>
               <button 
                 onClick={() => scrollToSection('contact')} 
@@ -195,7 +195,7 @@ const Index = () => {
             
             <div className="flex justify-center lg:justify-end">
               <div className="max-w-md w-full p-8 bg-white/80 dark:bg-slate-800/80 backdrop-blur-lg rounded-3xl shadow-2xl border border-white/40 dark:border-slate-700/40">
-                <h3 className="text-2xl font-bold mb-6 text-center">Quick Access</h3>
+                <h3 className="text-2xl font-bold mb-6 text-center">{t('quickAccess')}</h3>
                 <div className="space-y-4">
                   <Button 
                     className="w-full justify-start h-14 text-lg"

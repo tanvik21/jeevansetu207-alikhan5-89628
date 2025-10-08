@@ -3,7 +3,7 @@ import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '@/com
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { Bot, User, Send } from 'lucide-react';
+import { Bot, User, Send, RefreshCw } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import { useLanguage } from '@/contexts/LanguageContext';
@@ -56,6 +56,24 @@ const AIHealthAssistant = () => {
     fetchUserAndMessages();
   }, []);
 
+  const clearSession = async () => {
+    if (!userId) return;
+    
+    try {
+      // Delete all chat messages for this user
+      await supabase
+        .from('ai_chat_messages')
+        .delete()
+        .eq('user_id', userId);
+      
+      setMessages([]);
+      toast.success(t('newSessionStarted'));
+    } catch (error: any) {
+      console.error('Error clearing session:', error);
+      toast.error('Failed to start new session');
+    }
+  };
+
   const handleSend = async () => {
     if (!input.trim() || !userId || isLoading) return;
     
@@ -76,7 +94,7 @@ const AIHealthAssistant = () => {
         
         // Create AI report case file for medical queries
         if (data.createReport && data.prediction) {
-          await supabase.from('ai_reports').insert({
+          const { error: insertError } = await supabase.from('ai_reports').insert({
             patient_id: userId,
             symptoms: userMessage,
             ai_prediction: data.prediction,
@@ -84,7 +102,16 @@ const AIHealthAssistant = () => {
             documents: [],
             status: 'generated'
           });
-          toast.success('AI Case File created for verification');
+          
+          if (!insertError) {
+            toast.success(t('reportCreatedSuccess'), {
+              description: t('reportCreatedDesc'),
+              action: {
+                label: t('startNewSession'),
+                onClick: clearSession
+              }
+            });
+          }
         }
       }
     } catch (error: any) {
@@ -98,10 +125,23 @@ const AIHealthAssistant = () => {
   return (
     <Card className="flex flex-col h-[500px] overflow-hidden">
       <CardHeader className="pb-3">
-        <CardTitle className="text-lg flex items-center gap-2">
-          <Bot className="h-5 w-5 text-primary" />
-          {t('aiHealthAssistant')}
-        </CardTitle>
+        <div className="flex items-center justify-between">
+          <CardTitle className="text-lg flex items-center gap-2">
+            <Bot className="h-5 w-5 text-primary" />
+            {t('aiHealthAssistant')}
+          </CardTitle>
+          {messages.length > 0 && (
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={clearSession}
+              className="flex items-center gap-2"
+            >
+              <RefreshCw className="h-4 w-4" />
+              {t('newSession')}
+            </Button>
+          )}
+        </div>
         <CardDescription>
           {t('welcome')} {userName}! {t('askHealthQuestion')}
         </CardDescription>
