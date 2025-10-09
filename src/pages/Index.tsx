@@ -9,6 +9,11 @@ import AuthPage from '@/components/auth/AuthPage';
 import JeevanSetuLogo from '@/components/ui/JeevanSetuLogo';
 import LanguageSelector from '@/components/ui/LanguageSelector';
 import ThemeToggle from '@/components/ui/ThemeToggle';
+import AnimatedBackground from '@/components/landing/AnimatedBackground';
+import AIHandshakeIllustration from '@/components/landing/AIHandshakeIllustration';
+import CareTimelineFlow from '@/components/landing/CareTimelineFlow';
+import WaveFooter from '@/components/landing/WaveFooter';
+import CancerScreeningDialog from '@/components/appointments/CancerScreeningDialog';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { 
   Activity, 
@@ -20,13 +25,13 @@ import {
   Clock, 
   Award, 
   ChevronRight, 
-  Play, 
-  Star, 
+  Sparkles,
+  Star,
   CheckCircle,
   MapPin,
+  Zap,
   Mail,
-  Github,
-  Home as HomeIcon
+  Github
 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 
@@ -126,102 +131,92 @@ const Index = () => {
       </header>
       
       <main>
-        {/* Hero Section */}
-        <section id="home" className="py-20 px-4 relative overflow-hidden">
-          <div className="absolute inset-0 bg-gradient-to-r from-primary/5 via-secondary/5 to-primary/5 dark:from-primary/10 dark:via-secondary/10 dark:to-primary/10"></div>
-          <div className="absolute top-20 left-20 w-72 h-72 bg-primary/10 dark:bg-primary/20 rounded-full blur-3xl animate-pulse-subtle"></div>
-          <div className="absolute bottom-20 right-20 w-96 h-96 bg-secondary/10 dark:bg-secondary/20 rounded-full blur-3xl animate-pulse-subtle"></div>
+        {/* Split Hero Section */}
+        <section id="home" className="min-h-screen flex items-center relative overflow-hidden">
+          <AnimatedBackground />
           
-          <div className="container mx-auto grid grid-cols-1 lg:grid-cols-2 gap-12 items-center relative z-10">
-            <div className="space-y-8">
-              <div className="space-y-6">
-                <div className="inline-flex items-center gap-2 bg-white/60 dark:bg-slate-800/60 backdrop-blur-sm px-4 py-2 rounded-full border border-primary/20">
-                  <Award className="h-4 w-4 text-primary" />
-                  <span className="text-sm font-medium text-primary">{t('leadingHealthcarePlatform')}</span>
-                </div>
-                
-                <h1 className="text-5xl md:text-6xl font-bold leading-tight">
-                  <span className="bg-gradient-to-r from-slate-900 via-slate-800 to-slate-900 dark:from-slate-100 dark:via-slate-200 dark:to-slate-100 bg-clip-text text-transparent">
-                    {t('advancedHealthcareTitle')}
+          <div className="container mx-auto px-4 relative z-10">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-20 items-center">
+              {/* Left: AI + Human Illustration */}
+              <div className="order-2 lg:order-1 h-[400px] lg:h-[600px]">
+                <AIHandshakeIllustration />
+              </div>
+
+              {/* Right: Content */}
+              <div className="order-1 lg:order-2 space-y-8">
+                <div className="inline-flex items-center gap-2 bg-white/80 dark:bg-slate-800/80 backdrop-blur-sm px-4 py-2 rounded-full border border-primary/30 shadow-lg animate-fade-in">
+                  <Sparkles className="h-4 w-4 text-primary animate-pulse" />
+                  <span className="text-sm font-semibold bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">
+                    {t('leadingHealthcarePlatform')}
                   </span>
-                </h1>
-                
-                <p className="text-xl text-slate-600 dark:text-slate-300 leading-relaxed">
-                  {t('heroSubheadline')}
-                </p>
-              </div>
-              
-              <div className="flex flex-wrap gap-4">
-                <Button 
-                  size="lg" 
-                  className="bg-gradient-to-r from-primary to-secondary hover:from-primary/90 hover:to-secondary/90 text-white px-8 py-6 rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 group"
-                  onClick={() => setIsAuthOpen(true)}
-                >
-                  {t('startJourney')}
-                  <ChevronRight className="h-5 w-5 ml-2 group-hover:translate-x-1 transition-transform" />
-                </Button>
-                <Button 
-                  size="lg" 
-                  variant="outline" 
-                  className="px-8 py-6 rounded-2xl border-2 hover:bg-white dark:hover:bg-slate-800 hover:shadow-lg transition-all duration-300 group"
-                  onClick={() => setIsAuthOpen(true)}
-                >
-                  <Users className="h-5 w-5 mr-2 group-hover:scale-110 transition-transform" />
-                  {t('joinAsProvider')}
-                </Button>
-              </div>
-              
-              <div className="grid grid-cols-2 gap-6 pt-8">
-                <div className="flex items-center gap-3 p-4 bg-white/60 dark:bg-slate-800/60 backdrop-blur-sm rounded-2xl border border-white/40 dark:border-slate-700/40">
-                  <div className="bg-gradient-to-r from-primary to-secondary p-2 rounded-xl">
-                    <Users className="h-5 w-5 text-white" />
-                  </div>
-                  <div>
-                    <p className="font-semibold text-slate-800 dark:text-slate-200">1000+</p>
-                    <p className="text-sm text-slate-600 dark:text-slate-400">{t('expertDoctors')}</p>
-                  </div>
                 </div>
-                <div className="flex items-center gap-3 p-4 bg-white/60 dark:bg-slate-800/60 backdrop-blur-sm rounded-2xl border border-white/40 dark:border-slate-700/40">
-                  <div className="bg-gradient-to-r from-secondary to-primary p-2 rounded-xl">
-                    <Clock className="h-5 w-5 text-white" />
+
+                <div className="space-y-6 animate-fade-in" style={{ animationDelay: '0.2s' }}>
+                  <h1 className="text-4xl md:text-6xl lg:text-7xl font-bold leading-tight">
+                    <span className="bg-gradient-to-r from-primary via-secondary to-primary bg-clip-text text-transparent animate-shimmer-glow">
+                      {t('heroHeadline')}
+                    </span>
+                  </h1>
+
+                  <p className="text-lg md:text-xl text-slate-600 dark:text-slate-300 leading-relaxed max-w-xl">
+                    {t('heroSubheadline')}
+                  </p>
+                </div>
+
+                <div className="flex flex-col sm:flex-row gap-4 animate-fade-in" style={{ animationDelay: '0.4s' }}>
+                  <Button 
+                    size="lg" 
+                    className="bg-gradient-to-r from-primary to-secondary hover:from-primary/90 hover:to-secondary/90 text-white px-8 py-6 rounded-2xl shadow-xl hover:shadow-2xl transition-all duration-300 group text-lg"
+                    onClick={() => setIsAuthOpen(true)}
+                  >
+                    <Zap className="h-5 w-5 mr-2 group-hover:rotate-12 transition-transform" />
+                    {t('startJourney')}
+                    <ChevronRight className="h-5 w-5 ml-2 group-hover:translate-x-1 transition-transform" />
+                  </Button>
+                  <Button 
+                    size="lg" 
+                    variant="outline" 
+                    className="px-8 py-6 rounded-2xl border-2 border-primary/30 hover:bg-primary/5 hover:border-primary hover:shadow-lg transition-all duration-300 group text-lg"
+                    onClick={() => setIsAuthOpen(true)}
+                  >
+                    <Users className="h-5 w-5 mr-2 group-hover:scale-110 transition-transform" />
+                    {t('joinAsProvider')}
+                  </Button>
+                </div>
+
+                {/* Stats */}
+                <div className="grid grid-cols-2 gap-4 pt-4 animate-fade-in" style={{ animationDelay: '0.6s' }}>
+                  <div className="p-4 bg-gradient-to-br from-white/80 to-white/40 dark:from-slate-800/80 dark:to-slate-800/40 backdrop-blur-sm rounded-2xl border border-white/60 dark:border-slate-700/60 shadow-lg">
+                    <div className="flex items-center gap-3">
+                      <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-primary to-secondary flex items-center justify-center">
+                        <Users className="h-6 w-6 text-white" />
+                      </div>
+                      <div>
+                        <p className="text-2xl font-bold bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">1000+</p>
+                        <p className="text-sm text-slate-600 dark:text-slate-400">{t('expertDoctors')}</p>
+                      </div>
+                    </div>
                   </div>
-                  <div>
-                    <p className="font-semibold text-slate-800 dark:text-slate-200">24/7</p>
-                    <p className="text-sm text-slate-600 dark:text-slate-400">{t('healthcare247')}</p>
+                  <div className="p-4 bg-gradient-to-br from-white/80 to-white/40 dark:from-slate-800/80 dark:to-slate-800/40 backdrop-blur-sm rounded-2xl border border-white/60 dark:border-slate-700/60 shadow-lg">
+                    <div className="flex items-center gap-3">
+                      <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-secondary to-primary flex items-center justify-center">
+                        <Clock className="h-6 w-6 text-white" />
+                      </div>
+                      <div>
+                        <p className="text-2xl font-bold bg-gradient-to-r from-secondary to-primary bg-clip-text text-transparent">24/7</p>
+                        <p className="text-sm text-slate-600 dark:text-slate-400">{t('healthcare247')}</p>
+                      </div>
+                    </div>
                   </div>
                 </div>
               </div>
             </div>
-            
-            <div className="flex justify-center lg:justify-end">
-              <div className="max-w-md w-full p-8 bg-white/80 dark:bg-slate-800/80 backdrop-blur-lg rounded-3xl shadow-2xl border border-white/40 dark:border-slate-700/40">
-                <h3 className="text-2xl font-bold mb-6 text-center">{t('quickAccess')}</h3>
-                <div className="space-y-4">
-                  <Button 
-                    className="w-full justify-start h-14 text-lg"
-                    onClick={() => setIsAuthOpen(true)}
-                  >
-                    <Users className="h-5 w-5 mr-3" />
-                    {t('patient')} {t('portal')}
-                  </Button>
-                  <Button 
-                    variant="outline"
-                    className="w-full justify-start h-14 text-lg"
-                    onClick={() => setIsAuthOpen(true)}
-                  >
-                    <Activity className="h-5 w-5 mr-3" />
-                    {t('doctor')} {t('portal')}
-                  </Button>
-                  <Button 
-                    variant="outline"
-                    className="w-full justify-start h-14 text-lg"
-                    onClick={() => setIsAuthOpen(true)}
-                  >
-                    <Brain className="h-5 w-5 mr-3" />
-                    {t('intern')} {t('portal')}
-                  </Button>
-                </div>
-              </div>
+          </div>
+
+          {/* Scroll indicator */}
+          <div className="absolute bottom-8 left-1/2 transform -translate-x-1/2 animate-bounce">
+            <div className="w-6 h-10 border-2 border-primary/30 rounded-full flex items-start justify-center p-2">
+              <div className="w-1 h-3 bg-primary rounded-full animate-pulse" />
             </div>
           </div>
         </section>
@@ -328,75 +323,63 @@ const Index = () => {
           </div>
         </section>
 
-        {/* Features Section */}
-        <section id="features" className="py-20 px-4 bg-white dark:bg-slate-900">
-          <div className="container mx-auto">
-            <div className="max-w-3xl mx-auto text-center space-y-6 mb-16">
-              <h2 className="text-4xl md:text-5xl font-bold bg-gradient-to-r from-slate-800 to-slate-900 dark:from-slate-100 dark:to-slate-200 bg-clip-text text-transparent">
-                {t('featuresTitle')}
+        {/* Care Journey Timeline - Redesigned Features Section */}
+        <section id="features" className="py-32 px-4 bg-gradient-to-br from-slate-50 via-white to-blue-50 dark:from-slate-900 dark:via-slate-900 dark:to-blue-950 relative overflow-hidden">
+          {/* Background decorative elements */}
+          <div className="absolute inset-0 opacity-10">
+            <div className="absolute top-1/4 left-10 w-64 h-64 bg-primary rounded-full blur-3xl" />
+            <div className="absolute bottom-1/4 right-10 w-64 h-64 bg-secondary rounded-full blur-3xl" />
+          </div>
+
+          <div className="container mx-auto relative z-10">
+            <div className="max-w-4xl mx-auto text-center space-y-6 mb-20">
+              <div className="inline-flex items-center gap-2 bg-white/80 dark:bg-slate-800/80 backdrop-blur-sm px-4 py-2 rounded-full border border-primary/30 shadow-lg">
+                <Sparkles className="h-4 w-4 text-primary animate-pulse" />
+                <span className="text-sm font-semibold text-primary">Verified AI Care Workflow</span>
+              </div>
+
+              <h2 className="text-4xl md:text-6xl font-bold">
+                <span className="bg-gradient-to-r from-primary via-secondary to-primary bg-clip-text text-transparent">
+                  From Symptom to Solution
+                </span>
               </h2>
-              <p className="text-xl text-slate-600 dark:text-slate-300 leading-relaxed">
-                {t('comprehensiveHealthcare')}
+              
+              <p className="text-xl text-slate-600 dark:text-slate-300 leading-relaxed max-w-2xl mx-auto">
+                Experience our complete AI-powered, human-verified care journey — designed for accuracy, empathy, and trust at every step
               </p>
             </div>
-            
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-              <div className="p-8 bg-gradient-to-br from-blue-50 to-indigo-50 dark:from-blue-900/20 dark:to-indigo-900/20 rounded-3xl shadow-lg hover:shadow-xl transition-all duration-300 text-left group card-hover">
-                <div className="bg-gradient-to-r from-primary to-secondary p-4 rounded-2xl inline-block group-hover:scale-110 transition-transform duration-300 mb-4">
+
+            {/* Timeline Flow Component */}
+            <CareTimelineFlow />
+
+            {/* Additional Feature Highlights */}
+            <div className="mt-20 grid grid-cols-1 md:grid-cols-3 gap-8 max-w-5xl mx-auto">
+              <div className="p-6 bg-white/80 dark:bg-slate-800/80 backdrop-blur-sm rounded-2xl border border-white/60 dark:border-slate-700/60 shadow-lg hover:shadow-xl transition-all duration-300 hover:-translate-y-2">
+                <div className="w-16 h-16 rounded-xl bg-gradient-to-br from-primary to-secondary flex items-center justify-center mb-4 shadow-lg">
                   <Brain className="h-8 w-8 text-white" />
                 </div>
-                <h3 className="text-2xl font-bold text-slate-800 dark:text-slate-200 mb-3">{t('featureSymptomChecker')}</h3>
-                <p className="text-slate-600 dark:text-slate-400 leading-relaxed">
+                <h3 className="text-xl font-bold mb-2">{t('featureSymptomChecker')}</h3>
+                <p className="text-slate-600 dark:text-slate-400 text-sm leading-relaxed">
                   {t('featureSymptomCheckerDesc')}
                 </p>
               </div>
-              
-              <div className="p-8 bg-gradient-to-br from-emerald-50 to-teal-50 dark:from-emerald-900/20 dark:to-teal-900/20 rounded-3xl shadow-lg hover:shadow-xl transition-all duration-300 text-left group card-hover">
-                <div className="bg-gradient-to-r from-emerald-500 to-teal-500 p-4 rounded-2xl inline-block group-hover:scale-110 transition-transform duration-300 mb-4">
+
+              <div className="p-6 bg-white/80 dark:bg-slate-800/80 backdrop-blur-sm rounded-2xl border border-white/60 dark:border-slate-700/60 shadow-lg hover:shadow-xl transition-all duration-300 hover:-translate-y-2">
+                <div className="w-16 h-16 rounded-xl bg-gradient-to-br from-emerald-500 to-teal-500 flex items-center justify-center mb-4 shadow-lg">
                   <CheckCircle className="h-8 w-8 text-white" />
                 </div>
-                <h3 className="text-2xl font-bold text-slate-800 dark:text-slate-200 mb-3">{t('featureVerification')}</h3>
-                <p className="text-slate-600 dark:text-slate-400 leading-relaxed">
+                <h3 className="text-xl font-bold mb-2">{t('featureVerification')}</h3>
+                <p className="text-slate-600 dark:text-slate-400 text-sm leading-relaxed">
                   {t('featureVerificationDesc')}
                 </p>
               </div>
-              
-              <div className="p-8 bg-gradient-to-br from-purple-50 to-pink-50 dark:from-purple-900/20 dark:to-pink-900/20 rounded-3xl shadow-lg hover:shadow-xl transition-all duration-300 text-left group card-hover">
-                <div className="bg-gradient-to-r from-purple-500 to-pink-500 p-4 rounded-2xl inline-block group-hover:scale-110 transition-transform duration-300 mb-4">
-                  <Activity className="h-8 w-8 text-white" />
-                </div>
-                <h3 className="text-2xl font-bold text-slate-800 dark:text-slate-200 mb-3">{t('featureOncologyTracker')}</h3>
-                <p className="text-slate-600 dark:text-slate-400 leading-relaxed">
-                  {t('featureOncologyTrackerDesc')}
-                </p>
-              </div>
-              
-              <div className="p-8 bg-gradient-to-br from-red-50 to-pink-50 dark:from-red-900/20 dark:to-pink-900/20 rounded-3xl shadow-lg hover:shadow-xl transition-all duration-300 text-left group card-hover">
-                <div className="bg-gradient-to-r from-red-500 to-pink-500 p-4 rounded-2xl inline-block group-hover:scale-110 transition-transform duration-300 mb-4">
-                  <Heart className="h-8 w-8 text-white" />
-                </div>
-                <h3 className="text-2xl font-bold text-slate-800 dark:text-slate-200 mb-3">{t('featureHospiceBridge')}</h3>
-                <p className="text-slate-600 dark:text-slate-400 leading-relaxed">
-                  {t('featureHospiceBridgeDesc')}
-                </p>
-              </div>
-              
-              <div className="p-8 bg-gradient-to-br from-orange-50 to-amber-50 dark:from-orange-900/20 dark:to-amber-900/20 rounded-3xl shadow-lg hover:shadow-xl transition-all duration-300 text-left group card-hover">
-                <div className="bg-gradient-to-r from-orange-500 to-amber-500 p-4 rounded-2xl inline-block group-hover:scale-110 transition-transform duration-300 mb-4">
-                  <FileText className="h-8 w-8 text-white" />
-                </div>
-                <h3 className="text-2xl font-bold text-slate-800 dark:text-slate-200 mb-3">{t('featureInternHub')}</h3>
-                <p className="text-slate-600 dark:text-slate-400 leading-relaxed">
-                  {t('featureInternHubDesc')}
-                </p>
-              </div>
-              
-              <div className="p-8 bg-gradient-to-br from-cyan-50 to-blue-50 dark:from-cyan-900/20 dark:to-blue-900/20 rounded-3xl shadow-lg hover:shadow-xl transition-all duration-300 text-left group card-hover">
-                <div className="bg-gradient-to-r from-cyan-500 to-blue-500 p-4 rounded-2xl inline-block group-hover:scale-110 transition-transform duration-300 mb-4">
+
+              <div className="p-6 bg-white/80 dark:bg-slate-800/80 backdrop-blur-sm rounded-2xl border border-white/60 dark:border-slate-700/60 shadow-lg hover:shadow-xl transition-all duration-300 hover:-translate-y-2">
+                <div className="w-16 h-16 rounded-xl bg-gradient-to-br from-purple-500 to-pink-500 flex items-center justify-center mb-4 shadow-lg">
                   <Shield className="h-8 w-8 text-white" />
                 </div>
-                <h3 className="text-2xl font-bold text-slate-800 dark:text-slate-200 mb-3">{t('featureMultilingual')}</h3>
-                <p className="text-slate-600 dark:text-slate-400 leading-relaxed">
+                <h3 className="text-xl font-bold mb-2">{t('featureMultilingual')}</h3>
+                <p className="text-slate-600 dark:text-slate-400 text-sm leading-relaxed">
                   {t('featureMultilingualDesc')}
                 </p>
               </div>
@@ -405,37 +388,47 @@ const Index = () => {
         </section>
 
         {/* Hospice & Cancer Awareness Section */}
-        <section id="hospice" className="py-20 px-4 bg-gradient-to-br from-purple-50 via-pink-50 to-rose-50 dark:from-purple-900/20 dark:via-pink-900/20 dark:to-rose-900/20">
-          <div className="container mx-auto">
+        <section id="hospice" className="py-20 px-4 bg-white dark:bg-slate-900 relative overflow-hidden">
+          {/* Background gradient */}
+          <div className="absolute inset-0">
+            <div className="absolute inset-0 bg-gradient-to-br from-purple-50/50 via-pink-50/50 to-rose-50/50 dark:from-purple-900/10 dark:via-pink-900/10 dark:to-rose-900/10" />
+            <div className="absolute top-1/4 right-1/4 w-96 h-96 bg-gradient-to-br from-pink-200/20 to-purple-200/20 dark:from-pink-900/10 dark:to-purple-900/10 rounded-full blur-3xl" />
+          </div>
+
+          <div className="container mx-auto relative z-10">
             <div className="max-w-4xl mx-auto text-center space-y-8">
-              <h2 className="text-4xl md:text-5xl font-bold bg-gradient-to-r from-purple-900 to-pink-900 dark:from-purple-100 dark:to-pink-100 bg-clip-text text-transparent">
-                {t('hospiceTitle')}
+              <h2 className="text-4xl md:text-5xl font-bold">
+                <span className="bg-gradient-to-r from-purple-600 via-pink-600 to-rose-600 dark:from-purple-400 dark:via-pink-400 dark:to-rose-400 bg-clip-text text-transparent">
+                  {t('hospiceTitle')}
+                </span>
               </h2>
               
               <p className="text-xl text-slate-700 dark:text-slate-300 leading-relaxed">
                 {t('hospiceDescription')}
               </p>
 
-              <Button 
-                size="lg" 
-                className="bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white px-10 py-6 rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300"
-              >
-                <MapPin className="h-5 w-5 mr-2" />
-                {t('findHospice')}
-              </Button>
+              <CancerScreeningDialog>
+                <Button 
+                  size="lg" 
+                  className="bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white px-10 py-6 rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300"
+                >
+                  <MapPin className="h-5 w-5 mr-2" />
+                  {t('findHospice')}
+                </Button>
+              </CancerScreeningDialog>
 
               <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mt-12">
-                <div className="bg-white/80 dark:bg-slate-800/80 backdrop-blur-sm p-6 rounded-2xl shadow-lg">
-                  <Heart className="h-12 w-12 text-pink-600 mx-auto mb-4" />
+                <div className="p-6 bg-white/90 dark:bg-slate-800/90 backdrop-blur-sm rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 hover:-translate-y-2 border border-pink-100 dark:border-pink-900/30">
+                  <Heart className="h-12 w-12 text-pink-600 mx-auto mb-4 animate-pulse" />
                   <h3 className="font-bold text-lg mb-2">Comfort Care</h3>
                   <p className="text-sm text-slate-600 dark:text-slate-400">Symptom management and pain relief</p>
                 </div>
-                <div className="bg-white/80 dark:bg-slate-800/80 backdrop-blur-sm p-6 rounded-2xl shadow-lg">
+                <div className="p-6 bg-white/90 dark:bg-slate-800/90 backdrop-blur-sm rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 hover:-translate-y-2 border border-purple-100 dark:border-purple-900/30">
                   <Users className="h-12 w-12 text-purple-600 mx-auto mb-4" />
                   <h3 className="font-bold text-lg mb-2">Family Support</h3>
                   <p className="text-sm text-slate-600 dark:text-slate-400">Emotional and practical guidance</p>
                 </div>
-                <div className="bg-white/80 dark:bg-slate-800/80 backdrop-blur-sm p-6 rounded-2xl shadow-lg">
+                <div className="p-6 bg-white/90 dark:bg-slate-800/90 backdrop-blur-sm rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 hover:-translate-y-2 border border-rose-100 dark:border-rose-900/30">
                   <Shield className="h-12 w-12 text-rose-600 mx-auto mb-4" />
                   <h3 className="font-bold text-lg mb-2">Dignity & Respect</h3>
                   <p className="text-sm text-slate-600 dark:text-slate-400">Compassionate end-of-life care</p>
@@ -551,51 +544,8 @@ const Index = () => {
         </section>
       </main>
       
-      <footer className="bg-slate-900 dark:bg-slate-950 text-white py-16 px-4 transition-colors">
-        <div className="container mx-auto">
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-8 mb-12">
-            <div className="space-y-4">
-              <JeevanSetuLogo size="md" />
-              <p className="text-slate-400 leading-relaxed">
-                Transforming healthcare with cutting-edge AI and telemedicine solutions for a healthier tomorrow.
-              </p>
-            </div>
-            
-            <div className="space-y-4">
-              <h3 className="font-semibold text-lg">Product</h3>
-              <ul className="space-y-3">
-                <li><button onClick={() => scrollToSection('features')} className="text-slate-400 hover:text-white transition-colors">Features</button></li>
-                <li><button onClick={() => scrollToSection('about')} className="text-slate-400 hover:text-white transition-colors">About</button></li>
-                <li><button onClick={() => scrollToSection('hospice')} className="text-slate-400 hover:text-white transition-colors">Hospice Care</button></li>
-              </ul>
-            </div>
-            
-            <div className="space-y-4">
-              <h3 className="font-semibold text-lg">For Healthcare</h3>
-              <ul className="space-y-3">
-                <li><button onClick={() => setIsAuthOpen(true)} className="text-slate-400 hover:text-white transition-colors">For Patients</button></li>
-                <li><button onClick={() => setIsAuthOpen(true)} className="text-slate-400 hover:text-white transition-colors">For Doctors</button></li>
-                <li><button onClick={() => setIsAuthOpen(true)} className="text-slate-400 hover:text-white transition-colors">For Interns</button></li>
-              </ul>
-            </div>
-            
-            <div className="space-y-4">
-              <h3 className="font-semibold text-lg">Support</h3>
-              <ul className="space-y-3">
-                <li><button onClick={() => scrollToSection('contact')} className="text-slate-400 hover:text-white transition-colors">Contact Us</button></li>
-                <li><a href="mailto:support@jeevansetu.com" className="text-slate-400 hover:text-white transition-colors">Email Support</a></li>
-                <li><a href="https://github.com/jeevansetu" target="_blank" rel="noopener noreferrer" className="text-slate-400 hover:text-white transition-colors">GitHub</a></li>
-              </ul>
-            </div>
-          </div>
-          
-          <div className="pt-8 border-t border-slate-800 text-center">
-            <p className="text-slate-400">
-              &copy; {new Date().getFullYear()} JeevanSetu. All rights reserved. {t('contactFooter')}
-            </p>
-          </div>
-        </div>
-      </footer>
+      {/* Wave Footer */}
+      <WaveFooter scrollToSection={scrollToSection} />
     </div>
   );
 };
