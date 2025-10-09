@@ -137,12 +137,12 @@ const Index = () => {
               <div className="space-y-6">
                 <div className="inline-flex items-center gap-2 bg-white/60 dark:bg-slate-800/60 backdrop-blur-sm px-4 py-2 rounded-full border border-primary/20">
                   <Award className="h-4 w-4 text-primary" />
-                  <span className="text-sm font-medium text-primary">India's Leading Healthcare Platform</span>
+                  <span className="text-sm font-medium text-primary">{t('leadingHealthcarePlatform')}</span>
                 </div>
                 
                 <h1 className="text-5xl md:text-6xl font-bold leading-tight">
                   <span className="bg-gradient-to-r from-slate-900 via-slate-800 to-slate-900 dark:from-slate-100 dark:via-slate-200 dark:to-slate-100 bg-clip-text text-transparent">
-                    Advanced healthcare with AI-powered Telemedicine
+                    {t('advancedHealthcareTitle')}
                   </span>
                 </h1>
                 
@@ -202,7 +202,7 @@ const Index = () => {
                     onClick={() => setIsAuthOpen(true)}
                   >
                     <Users className="h-5 w-5 mr-3" />
-                    {t('patient')} Portal
+                    {t('patient')} {t('portal')}
                   </Button>
                   <Button 
                     variant="outline"
@@ -210,7 +210,7 @@ const Index = () => {
                     onClick={() => setIsAuthOpen(true)}
                   >
                     <Activity className="h-5 w-5 mr-3" />
-                    {t('doctor')} Portal
+                    {t('doctor')} {t('portal')}
                   </Button>
                   <Button 
                     variant="outline"
@@ -218,7 +218,7 @@ const Index = () => {
                     onClick={() => setIsAuthOpen(true)}
                   >
                     <Brain className="h-5 w-5 mr-3" />
-                    {t('intern')} Portal
+                    {t('intern')} {t('portal')}
                   </Button>
                 </div>
               </div>
@@ -239,7 +239,7 @@ const Index = () => {
               </p>
 
               <div className="bg-gradient-to-br from-red-50 to-pink-50 dark:from-red-900/20 dark:to-pink-900/20 p-8 rounded-2xl border border-red-100 dark:border-red-900/40">
-                <h3 className="text-2xl font-bold mb-4 text-red-900 dark:text-red-100">Cancer Care Integration</h3>
+                <h3 className="text-2xl font-bold mb-4 text-red-900 dark:text-red-100">{t('cancerCareIntegration')}</h3>
                 <p className="text-lg text-slate-700 dark:text-slate-300 leading-relaxed">
                   {t('aboutCancer')}
                 </p>
@@ -257,10 +257,10 @@ const Index = () => {
           <div className="container mx-auto text-center">
             <div className="max-w-3xl mx-auto space-y-6 mb-16">
               <h2 className="text-4xl md:text-5xl font-bold bg-gradient-to-r from-slate-800 to-slate-900 dark:from-slate-100 dark:to-slate-200 bg-clip-text text-transparent">
-                For Patients, Doctors & Medical Interns
+                {t('forRolesTitle')}
               </h2>
               <p className="text-xl text-slate-600 dark:text-slate-300 leading-relaxed">
-                Our platform caters to the entire healthcare ecosystem, providing specialized tools for each role.
+                {t('platformCatersDesc')}
               </p>
             </div>
             
@@ -274,12 +274,12 @@ const Index = () => {
                     <div className="space-y-3">
                       <h3 className="text-2xl font-bold text-slate-800 dark:text-slate-200">{t('forPatients')}</h3>
                       <p className="text-slate-600 dark:text-slate-400 leading-relaxed">
-                        Access virtual consultations, AI symptom checking, and maintain your complete health records in one secure place.
+                        {t('accessVirtualConsultations')}
                       </p>
                     </div>
                     <div className="flex items-center gap-2 text-primary">
                       <CheckCircle className="h-4 w-4" />
-                      <span className="text-sm font-medium">Trusted by 50K+ patients</span>
+                      <span className="text-sm font-medium">{t('trustedByPatients')}</span>
                     </div>
                   </div>
                 </CardContent>
@@ -294,12 +294,12 @@ const Index = () => {
                     <div className="space-y-3">
                       <h3 className="text-2xl font-bold text-slate-800 dark:text-slate-200">{t('forDoctors')}</h3>
                       <p className="text-slate-600 dark:text-slate-400 leading-relaxed">
-                        Build your professional profile, validate AI diagnoses, and serve your community to increase visibility and impact.
+                        {t('buildProfessionalProfile')}
                       </p>
                     </div>
                     <div className="flex items-center gap-2 text-emerald-600">
                       <Star className="h-4 w-4 fill-current" />
-                      <span className="text-sm font-medium">4.9/5 doctor rating</span>
+                      <span className="text-sm font-medium">{t('doctorRating')}</span>
                     </div>
                   </div>
                 </CardContent>
@@ -314,12 +314,12 @@ const Index = () => {
                     <div className="space-y-3">
                       <h3 className="text-2xl font-bold text-slate-800 dark:text-slate-200">{t('forInterns')}</h3>
                       <p className="text-slate-600 dark:text-slate-400 leading-relaxed">
-                        Learn from experienced doctors, understand AI diagnostics, and track your medical training progress.
+                        {t('learnFromExperts')}
                       </p>
                     </div>
                     <div className="flex items-center gap-2 text-purple-600">
                       <Brain className="h-4 w-4" />
-                      <span className="text-sm font-medium">AI-powered learning</span>
+                      <span className="text-sm font-medium">{t('aiPoweredLearning')}</span>
                     </div>
                   </div>
                 </CardContent>
@@ -336,7 +336,7 @@ const Index = () => {
                 {t('featuresTitle')}
               </h2>
               <p className="text-xl text-slate-600 dark:text-slate-300 leading-relaxed">
-                Comprehensive healthcare solutions powered by AI and verified by experts
+                {t('comprehensiveHealthcare')}
               </p>
             </div>
             

@@ -12,8 +12,9 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Badge } from '@/components/ui/badge';
-import { MapPin, Phone, Clock, Navigation } from 'lucide-react';
+import { MapPin, Phone, Clock, Navigation, Loader2 } from 'lucide-react';
 import { toast } from 'sonner';
+import { supabase } from '@/integrations/supabase/client';
 
 interface CancerScreeningDialogProps {
   children?: React.ReactNode;
@@ -23,6 +24,8 @@ const CancerScreeningDialog: React.FC<CancerScreeningDialogProps> = ({ children 
   const [open, setOpen] = useState(false);
   const [location, setLocation] = useState('');
   const [screeningType, setScreeningType] = useState('');
+  const [centers, setCenters] = useState<any[]>([]);
+  const [isSearching, setIsSearching] = useState(false);
 
   const screeningTypes = [
     'Breast Cancer Screening',
@@ -34,46 +37,39 @@ const CancerScreeningDialog: React.FC<CancerScreeningDialogProps> = ({ children 
     'General Cancer Screening'
   ];
 
-  const mockCenters = [
-    {
-      id: 1,
-      name: 'City Cancer Screening Center',
-      address: '123 Medical District, Downtown',
-      distance: '2.3 km',
-      phone: '555-0101',
-      hours: 'Mon-Fri: 8AM-6PM',
-      types: ['Breast', 'Cervical', 'Colorectal'],
-      waitTime: '2-3 days'
-    },
-    {
-      id: 2,
-      name: 'Regional Health Screening Facility',
-      address: '456 Healthcare Ave, Medical Plaza',
-      distance: '5.1 km',
-      phone: '555-0202',
-      hours: 'Mon-Sat: 7AM-8PM',
-      types: ['All Types'],
-      waitTime: 'Same day'
-    },
-    {
-      id: 3,
-      name: 'Community Wellness Screening Center',
-      address: '789 Wellness Blvd, Health District',
-      distance: '7.8 km',
-      phone: '555-0303',
-      hours: 'Mon-Fri: 9AM-5PM',
-      types: ['Breast', 'Prostate', 'Skin'],
-      waitTime: '1 week'
-    }
-  ];
-
-  const handleSearch = () => {
-    if (!location && !screeningType) {
-      toast.error('Please enter your location or select a screening type');
+  const handleSearch = async () => {
+    if (!location.trim()) {
+      toast.error('Please enter your location');
       return;
     }
     
-    toast.success('Searching for screening centers near you...');
+    setIsSearching(true);
+    toast.loading('Searching for screening centers near you...');
+
+    try {
+      const { data, error } = await supabase.functions.invoke('cancer-screening-locations', {
+        body: { 
+          location: location,
+          screeningType: screeningType
+        }
+      });
+
+      if (error) {
+        console.error('Search error:', error);
+        throw error;
+      }
+
+      console.log('Search results:', data);
+      setCenters(data.centers || []);
+      toast.dismiss();
+      toast.success(`Found ${data.centers?.length || 0} screening centers near ${location}`);
+    } catch (error) {
+      console.error('Error searching for centers:', error);
+      toast.dismiss();
+      toast.error('Failed to search for centers. Please try again.');
+    } finally {
+      setIsSearching(false);
+    }
   };
 
   return (
@@ -123,14 +119,24 @@ const CancerScreeningDialog: React.FC<CancerScreeningDialogProps> = ({ children 
             </div>
           </div>
 
-          <Button onClick={handleSearch} className="w-full">
-            <Navigation className="h-4 w-4 mr-2" />
-            Search Nearby Centers
+          <Button onClick={handleSearch} className="w-full" disabled={isSearching}>
+            {isSearching ? (
+              <>
+                <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                Searching...
+              </>
+            ) : (
+              <>
+                <Navigation className="h-4 w-4 mr-2" />
+                Search Nearby Centers
+              </>
+            )}
           </Button>
 
-          <div className="space-y-3 mt-6">
-            <h3 className="font-semibold text-sm">Screening Centers Near You</h3>
-            {mockCenters.map((center) => (
+          {centers.length > 0 && (
+            <div className="space-y-3 mt-6">
+              <h3 className="font-semibold text-sm">Screening Centers Near You</h3>
+              {centers.map((center) => (
               <div key={center.id} className="border rounded-lg p-4 space-y-3 hover:border-primary/50 transition-colors">
                 <div className="flex justify-between items-start">
                   <div className="flex-1">
@@ -174,8 +180,9 @@ const CancerScreeningDialog: React.FC<CancerScreeningDialogProps> = ({ children 
                   </Button>
                 </div>
               </div>
-            ))}
-          </div>
+              ))}
+            </div>
+          )}
         </div>
       </DialogContent>
     </Dialog>
