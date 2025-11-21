@@ -1,10 +1,19 @@
 project_id = "qajulrrbbppkigdvpgfy"
 
-[functions.ai-chat]
-verify_jwt = false
-
 [functions.symptom-analysis]
 verify_jwt = true
 
 [functions.cancer-screening-locations]
+verify_jwt = true
+
+[functions.ai-chat]
+verify_jwt = true
+
+[functions.claim-case]
+verify_jwt = true
+
+[functions.submit-intern-review]
+verify_jwt = true
+
+[functions.finalize-doctor-review]
 verify_jwt = true
