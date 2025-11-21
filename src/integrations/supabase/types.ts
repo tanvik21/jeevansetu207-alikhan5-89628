@@ -41,6 +41,10 @@ export type Database = {
       ai_reports: {
         Row: {
           ai_prediction: string
+          assigned_doctor_id: string | null
+          assigned_intern_id: string | null
+          claim_expires_at: string | null
+          claimed_at: string | null
           confidence_score: number | null
           created_at: string | null
           documents: string[] | null
@@ -52,6 +56,10 @@ export type Database = {
         }
         Insert: {
           ai_prediction: string
+          assigned_doctor_id?: string | null
+          assigned_intern_id?: string | null
+          claim_expires_at?: string | null
+          claimed_at?: string | null
           confidence_score?: number | null
           created_at?: string | null
           documents?: string[] | null
@@ -63,6 +71,10 @@ export type Database = {
         }
         Update: {
           ai_prediction?: string
+          assigned_doctor_id?: string | null
+          assigned_intern_id?: string | null
+          claim_expires_at?: string | null
+          claimed_at?: string | null
           confidence_score?: number | null
           created_at?: string | null
           documents?: string[] | null
@@ -72,7 +84,64 @@ export type Database = {
           symptoms?: string
           updated_at?: string | null
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "ai_reports_assigned_doctor_id_fkey"
+            columns: ["assigned_doctor_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "ai_reports_assigned_intern_id_fkey"
+            columns: ["assigned_intern_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      case_audit_logs: {
+        Row: {
+          action: string
+          case_id: string
+          created_at: string
+          details: Json | null
+          id: string
+          user_id: string | null
+        }
+        Insert: {
+          action: string
+          case_id: string
+          created_at?: string
+          details?: Json | null
+          id?: string
+          user_id?: string | null
+        }
+        Update: {
+          action?: string
+          case_id?: string
+          created_at?: string
+          details?: Json | null
+          id?: string
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "case_audit_logs_case_id_fkey"
+            columns: ["case_id"]
+            isOneToOne: false
+            referencedRelation: "ai_reports"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "case_audit_logs_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       doctor_verifications: {
         Row: {
@@ -80,7 +149,9 @@ export type Database = {
           created_at: string | null
           doctor_id: string
           feedback: string | null
+          final_conclusion: string | null
           id: string
+          prescription: string | null
           report_id: string
           verified_at: string | null
           verified_summary: string | null
@@ -90,7 +161,9 @@ export type Database = {
           created_at?: string | null
           doctor_id: string
           feedback?: string | null
+          final_conclusion?: string | null
           id?: string
+          prescription?: string | null
           report_id: string
           verified_at?: string | null
           verified_summary?: string | null
@@ -100,7 +173,9 @@ export type Database = {
           created_at?: string | null
           doctor_id?: string
           feedback?: string | null
+          final_conclusion?: string | null
           id?: string
+          prescription?: string | null
           report_id?: string
           verified_at?: string | null
           verified_summary?: string | null
@@ -166,6 +241,7 @@ export type Database = {
           intern_id: string
           notes: string | null
           report_id: string
+          status: string | null
           verified_at: string | null
         }
         Insert: {
@@ -176,6 +252,7 @@ export type Database = {
           intern_id: string
           notes?: string | null
           report_id: string
+          status?: string | null
           verified_at?: string | null
         }
         Update: {
@@ -186,6 +263,7 @@ export type Database = {
           intern_id?: string
           notes?: string | null
           report_id?: string
+          status?: string | null
           verified_at?: string | null
         }
         Relationships: [
@@ -301,6 +379,14 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      atomic_claim_case_doctor: {
+        Args: { p_case_id: string; p_doctor_id: string }
+        Returns: Json
+      }
+      atomic_claim_case_intern: {
+        Args: { p_case_id: string; p_intern_id: string }
+        Returns: Json
+      }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]
@@ -308,6 +394,7 @@ export type Database = {
         }
         Returns: boolean
       }
+      release_expired_claims: { Args: never; Returns: undefined }
     }
     Enums: {
       app_role: "admin" | "doctor" | "intern" | "patient"
