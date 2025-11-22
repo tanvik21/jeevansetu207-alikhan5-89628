@@ -53,7 +53,12 @@ const VerificationQueue = () => {
   const fetchPendingReports = async () => {
     try {
       const { data: { user } } = await supabase.auth.getUser();
-      if (!user) return;
+      if (!user) {
+        console.log('No user authenticated');
+        return;
+      }
+
+      console.log('Fetching reports for intern:', user.id);
 
       // Fetch unassigned cases and cases assigned to current user
       const { data, error } = await supabase
@@ -61,6 +66,8 @@ const VerificationQueue = () => {
         .select('*')
         .or(`status.in.(pending_intern,generated),and(status.eq.assigned_intern,assigned_intern_id.eq.${user.id})`)
         .order('created_at', { ascending: true });
+
+      console.log('Query result:', { data, error, count: data?.length });
 
       if (error) throw error;
       setReports(data || []);
