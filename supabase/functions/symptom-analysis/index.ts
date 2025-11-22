@@ -114,7 +114,7 @@ CRITICAL: Ensure probabilities are dynamic and based on the specific symptoms, n
         symptoms: symptoms,
         ai_prediction: analysis,
         confidence_score: 0.85,
-        status: 'pending_intern_review'
+        status: 'pending_intern'
       })
       .select()
       .single();
@@ -125,6 +125,23 @@ CRITICAL: Ensure probabilities are dynamic and based on the specific symptoms, n
     }
 
     console.log('AI report created with ID:', reportData.id);
+
+    // Create audit log for case creation
+    const { error: auditError } = await supabase
+      .from('case_audit_logs')
+      .insert({
+        case_id: reportData.id,
+        user_id: userId,
+        action: 'created_by_ai',
+        details: { 
+          timestamp: new Date().toISOString(),
+          symptoms: symptoms.substring(0, 100)
+        }
+      });
+
+    if (auditError) {
+      console.error('Audit log error:', auditError);
+    }
 
     return new Response(
       JSON.stringify({ 
